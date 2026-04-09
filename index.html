@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HarmonyOS API Levels</title>
+<style>
+* { box-sizing: border-box; }
+html { font-size: 16px; }
+:root {
+    --bg-color: #fff;
+    --text-color: #333;
+    --text-secondary: #666;
+    --border-color: #dee2e6;
+    --table-bg: #fff;
+    --table-hover: #f8f9fa;
+    --table-header-bg: #f8f9fa;
+    --usage-bar-start: #60ECAD;
+    --usage-bar-end: #fff;
+    --code-bg: #f4f4f4;
+    --title-color: #1a1a1a;
+    --link-color: #007DFF;
+    --beta-color: #007DFF;
+    --beta-bg: #e7f3ff;
+    --stable-color: #28a745;
+    --stable-bg: #e8f5e9;
+}
+[data-theme="dark"] {
+    --bg-color: #1a1a2e;
+    --text-color: #e0e0e0;
+    --text-secondary: #a0a0a0;
+    --border-color: #3a3a4a;
+    --table-bg: #1a1a2e;
+    --table-hover: #2a2a3e;
+    --table-header-bg: #2a2a3e;
+    --usage-bar-start: #00C853;
+    --usage-bar-end: transparent;
+    --code-bg: #2a2a3e;
+    --title-color: #e0e0e0;
+    --link-color: #64B5F6;
+    --beta-color: #64B5F6;
+    --beta-bg: #1e3a5f;
+    --stable-color: #81C784;
+    --stable-bg: #1b3d1b;
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.5;
+    color: var(--text-color);
+    background-color: var(--bg-color);
+    margin: 0;
+    padding: 0;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+.container {
+    max-width: 960px;
+    margin: 0 auto;
+}
+#site-title {
+    font-size: 2.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+#site-title a {
+    color: var(--title-color);
+    text-decoration: none;
+}
+h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+}
+h4 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+}
+#intro {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+    padding: 0.75rem 1rem 0.75rem 1.25rem;
+    line-height: 1.7;
+    border-left: 3px solid var(--link-color);
+    background: linear-gradient(90deg, rgba(0, 125, 255, 0.05), transparent);
+    text-align: left;
+}
+#theme-toggle {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    background: var(--table-header-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    transition: all 0.3s ease;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+#theme-toggle:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+#theme-toggle svg {
+    width: 22px;
+    height: 22px;
+}
+#theme-toggle svg line, #theme-toggle svg circle, #theme-toggle svg path {
+    stroke: var(--text-color);
+}
+[data-theme="dark"] #sun-icon { display: block; }
+[data-theme="dark"] #moon-icon { display: none; }
+[data-theme="light"] #sun-icon { display: none; }
+[data-theme="light"] #moon-icon { display: block; }
+#lang-toggle {
+    position: fixed;
+    top: 1rem;
+    right: 4rem;
+    background: var(--table-header-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    color: var(--text-color);
+}
+#lang-toggle:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.table-responsive {
+    overflow-x: auto;
+    margin-bottom: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--table-bg);
+    border-radius: 8px;
+    overflow: hidden;
+}
+th, td {
+    padding: 0.875rem 1rem;
+    text-align: left;
+    border: none;
+    vertical-align: middle;
+}
+thead {
+    border-bottom: 2px solid var(--border-color);
+}
+tbody tr {
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.2s ease;
+}
+tbody tr:last-child {
+    border-bottom: none;
+}
+th {
+    font-weight: 600;
+    background-color: var(--table-header-bg);
+    border-bottom: 2px solid var(--border-color);
+    white-space: nowrap;
+}
+th:nth-child(1), td:nth-child(1) {
+    min-width: 3.5rem;
+    text-align: center;
+}
+th:nth-child(2), td:nth-child(2) {
+    min-width: 12rem;
+}
+th:nth-child(3), td:nth-child(3) {
+    min-width: 7rem;
+    white-space: nowrap;
+}
+th:nth-child(4), td:nth-child(4) {
+    min-width: 5rem;
+    text-align: center;
+}
+th:last-child, td:last-child {
+    min-width: 10rem;
+}
+tr:hover {
+    background-color: var(--table-hover);
+}
+.table-notes td {
+    background-color: var(--table-hover);
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+.table-notes ul {
+    margin: 0;
+    padding-left: 1.5rem;
+}
+.table-notes li {
+    margin-bottom: 0.25rem;
+}
+.usage-cell {
+    position: relative;
+    min-width: 80px;
+}
+.usage-bar {
+    border-radius: 4px;
+    font-weight: 500;
+}
+code {
+    background-color: var(--code-bg);
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 0.875em;
+}
+.beta {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--beta-color);
+    background-color: var(--beta-bg);
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    margin-left: 0.25rem;
+}
+.stable {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--stable-color);
+    background-color: var(--stable-bg);
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    margin-left: 0.25rem;
+}
+.subversion {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    display: block;
+}
+#site-footer {
+    text-align: center;
+    margin-top: 50px;
+    padding: 40px 20px;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+#site-footer p {
+    margin: 5px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+#site-footer a {
+    color: var(--link-color);
+    text-decoration: none;
+}
+#site-footer a:hover {
+    text-decoration: underline;
+}
+.separator {
+    color: var(--text-secondary);
+}
+.github-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+.github-icon {
+    width: 16px;
+    height: 16px;
+}
+table a {
+    color: var(--link-color);
+    text-decoration: none;
+    font-weight: 600;
+}
+table a:hover {
+    text-decoration: underline;
+}
+.nowrap { white-space: nowrap; }
+.footnote { font-size: 0.75rem; vertical-align: super; }
+.source-links {
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+.source-links a {
+    color: var(--link-color);
+    text-decoration: none;
+    display: inline-block;
+    margin-right: 1.5rem;
+}
+.source-links a:hover {
+    text-decoration: underline;
+}
+.source-links a::before {
+    content: '→ ';
+    color: var(--text-secondary);
+}
+</style>
+</head>
+<body>
+<button id="theme-toggle" title="切换主题">
+<svg id="moon-icon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+<svg id="sun-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2" fill="none"/><line x1="12" y1="1" x2="12" y2="3" stroke="currentColor" stroke-width="2"/><line x1="12" y1="21" x2="12" y2="23" stroke="currentColor" stroke-width="2"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke="currentColor" stroke-width="2"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" stroke="currentColor" stroke-width="2"/><line x1="1" y1="12" x2="3" y2="12" stroke="currentColor" stroke-width="2"/><line x1="21" y1="12" x2="23" y2="12" stroke="currentColor" stroke-width="2"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke="currentColor" stroke-width="2"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke="currentColor" stroke-width="2"/></svg>
+</button>
+<button id="lang-toggle" title="切换语言">中</button>
+<script>
+(function() {
+    // 检查本地存储的主题设置
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme) {
+        document.documentElement.setAttribute("data-theme", savedTheme);
+    } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        // 获取系统主题偏好
+        document.documentElement.setAttribute("data-theme", "dark");
+    } else {
+        document.documentElement.setAttribute("data-theme", "light");
+    }
+    // 主题切换函数
+    const toggleTheme = () => {
+        const currentTheme = document.documentElement.getAttribute("data-theme");
+        const newTheme = currentTheme === "dark" ? "light" : "dark";
+        document.documentElement.setAttribute("data-theme", newTheme);
+        localStorage.setItem("theme", newTheme);
+    };
+    // 绑定按钮点击事件
+    document.getElementById("theme-toggle").addEventListener("click", toggleTheme);
+    // 监听系统主题变化
+    if (window.matchMedia) {
+        window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
+            if (!localStorage.getItem("theme")) {
+                document.documentElement.setAttribute("data-theme", e.matches ? "dark" : "light");
+            }
+        });
+    }
+
+    // 语言切换功能
+    const translations = {
+        "site-title": { zh: "HarmonyOS API Levels", en: "HarmonyOS API Levels" },
+        "intro": { zh: "这是鸿蒙系统 API 和系统版本映射关系参考表，涵盖单框架与双框架两个技术路线。单框架代表纯鸿蒙架构，双框架则兼容 Android 应用生态。使用率数据来源于华为官方，定期更新。", en: "This reference table documents the mapping between HarmonyOS API levels and system versions across both single-framework and dual-framework architectures. The single-framework represents pure HarmonyOS, while dual-framework maintains Android compatibility. Usage statistics are sourced from Huawei's official developer documentation and updated periodically." },
+        "section-single": { zh: "单框架", en: "Single Framework" },
+        "section-dual": { zh: "双框架", en: "Dual Framework" },
+        "section-notes": { zh: "版本类型说明", en: "Version Types" },
+        "th-api": { zh: "API", en: "API" },
+        "th-version": { zh: "对应系统版本", en: "System Version" },
+        "th-date": { zh: "发布时间", en: "Release Date" },
+        "th-usage": { zh: "使用率", en: "Usage" },
+        "th-android": { zh: "支持的 Android 版本", en: "Android Version" },
+        "th-note": { zh: "备注", en: "Notes" },
+        "th-type": { zh: "类型", en: "Type" },
+        "th-desc": { zh: "说明", en: "Description" },
+        "th-purpose": { zh: "作用", en: "Purpose" },
+    };
+
+    const savedLang = localStorage.getItem("lang") || "zh";
+    document.documentElement.setAttribute("data-lang", savedLang);
+    document.getElementById("lang-toggle").textContent = savedLang === "zh" ? "EN" : "中";
+
+    const applyLanguage = (lang) => {
+        document.querySelectorAll("[data-i18n]").forEach(el => {
+            const key = el.getAttribute("data-i18n");
+            if (translations[key] && translations[key][lang]) {
+                el.textContent = translations[key][lang];
+            }
+        });
+        document.getElementById("lang-toggle").textContent = lang === "zh" ? "EN" : "中";
+    };
+
+    applyLanguage(savedLang);
+
+    document.getElementById("lang-toggle").addEventListener("click", () => {
+        const currentLang = document.documentElement.getAttribute("data-lang");
+        const newLang = currentLang === "zh" ? "en" : "zh";
+        document.documentElement.setAttribute("data-lang", newLang);
+        localStorage.setItem("lang", newLang);
+        applyLanguage(newLang);
+    });
+})();
+</script>
+<div class="container">
+<h1 id="site-title"><a href="#" data-i18n="site-title">HarmonyOS API Levels</a></h1>
+<p id="intro" data-i18n="intro">这是鸿蒙系统 API 和系统版本映射关系参考表，涵盖单框架与双框架两个技术路线。单框架代表纯鸿蒙架构，双框架则兼容 Android 应用生态。使用率数据来源于华为官方，定期更新。</p>
+</div>
+<div class="container">
+<div id="page-content">
+<h2 id="单框架" data-i18n="section-single">单框架</h2>
+<div class="table-responsive">
+<table>
+<thead><tr><th><span data-i18n="th-api">API</span></th><th><span data-i18n="th-version">对应系统版本</span></th><th><span data-i18n="th-date">发布时间</span></th><th><span data-i18n="th-usage">使用率</span></th><th><span data-i18n="th-note">备注</span></th></tr></thead><tbody>
+<tr><td>23</td><td><b>HarmonyOS 6.1</b> <sup class="beta">PREVIEW</sup></td><td>2026-Q2（预计）</td><td>-</td><td><span class="beta">PREVIEW</span> 预览版本，支持 PC 模式与 Linux 工具集成</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-602" target="_blank" rel="noopener">22</a></td><td><b>HarmonyOS 6.0.2</b></td><td>2026-01-21</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 12.5%, var(--usage-bar-end) 12.5%);">12.5%</td><td><span class="stable">LATEST</span> 最新稳定版，移除"NEXT"后缀，统一全设备框架</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-601" target="_blank" rel="noopener">21</a></td><td><b>HarmonyOS 6.0.1</b></td><td>2025-11-20</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 8.2%, var(--usage-bar-end) 8.2%);">8.2%</td><td>基于 API 21，无行为变更，稳定性增强</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-600" target="_blank" rel="noopener">20</a></td><td><b>HarmonyOS 6.0.0</b></td><td>2025-09-25</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 15.3%, var(--usage-bar-end) 15.3%);">15.3%</td><td>新增"碰一碰"连接、企业空间 Kit、屏幕时间管理、AI 照片编辑工具</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-511-beta1" target="_blank" rel="noopener">19</a></td><td><b>HarmonyOS 5.1.1</b></td><td>2025-06-30</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 22.1%, var(--usage-bar-end) 22.1%);">22.1%</td><td><span class="stable">ACTIVE</span> 持续支持中，新增相机与 AI 功能</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-510" target="_blank" rel="noopener">18</a></td><td><b>HarmonyOS 5.1.0</b></td><td>2025-06-11</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 18.7%, var(--usage-bar-end) 18.7%);">18.7%</td><td>新增 Ability Kit、Account Kit、App Linking 能力</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-505-release" target="_blank" rel="noopener">17</a></td><td><b>HarmonyOS 5.0.5</b></td><td>2025-05-14</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 3.2%, var(--usage-bar-end) 3.2%);">3.2%</td><td>NEXT 迭代版本，增强分布式能力</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-504" target="_blank" rel="noopener">16</a></td><td><b>HarmonyOS 5.0.4</b></td><td>2025-03-29</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 5.8%, var(--usage-bar-end) 5.8%);">5.8%</td><td><span class="stable">ACTIVE</span> HarmonyOS NEXT：<strong>纯单框架，完全移除 AOSP</strong>，基于 OpenHarmony L0-L2</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-503" target="_blank" rel="noopener">15</a></td><td><b>HarmonyOS 5.0.3</b></td><td>2025-03-15</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 2.1%, var(--usage-bar-end) 2.1%);">2.1%</td><td>Ability Kit 增强、UX 样式更新、开发工具变更</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-502-release" target="_blank" rel="noopener">14</a></td><td><b>HarmonyOS 5.0.2</b></td><td>2025-01-27</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 1.5%, var(--usage-bar-end) 1.5%);">1.5%</td><td>键盘 avoidance 模式支持光标避让、多项优化与修复</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-501" target="_blank" rel="noopener">13</a></td><td><b>HarmonyOS 5.0.1</b></td><td>2024-11-30</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 1.2%, var(--usage-bar-end) 1.2%);">1.2%</td><td>进一步提升 API 13 能力，稳定性改进</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-500" target="_blank" rel="noopener">12</a></td><td><b>HarmonyOS 5.0.0</b></td><td>2024-10-22</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 3.3%, var(--usage-bar-end) 3.3%);">3.3%</td><td><span class="stable">ACTIVE</span> NEXT Public Beta / Commercial：消费者公测及商用发布，正式命名为 HarmonyOS 5。<strong>纯鸿蒙里程碑</strong>。正式确立 ArkTS 声明式开发范式，彻底转向原生架构。</td></tr>
+<tr><td>12</td><td><b>HarmonyOS 5/NEXT Lite (Wearable)</b> <sup class="beta">LITE</sup></td><td>2024-09-19</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 3.3%, var(--usage-bar-end) 3.3%);">3.3%</td><td>可穿戴设备专用，基于 LiteOS 内核的轻量版</td></tr>
+<tr><td>12</td><td><b>NEXT Developer Beta 1</b> <sup class="beta">BETA</sup></td><td>2024-06-21</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 3.3%, var(--usage-bar-end) 3.3%);">3.3%</td><td>首个公开开发者测试版，"全场景"智能系统</td></tr>
+<tr><td>11</td><td><b>NEXT Developer Preview 1 (Canary)</b> <sup class="beta">CANARY</sup></td><td>2024-01-18</td><td>-</td><td>新增大量 ArkTS API，扩展分布式硬件支持</td></tr>
+<tr><td>10</td><td><b>NEXT Developer Preview 1</b> <sup class="beta">PREVIEW</sup></td><td>2023-10-26</td><td>-</td><td>新增 PC/平板模式支持，基于 OpenHarmony 4.0</td></tr>
+<tr><td>9</td><td><b>NEXT Developer Preview 1 (Internal)</b> <sup class="beta">INTERNAL</sup></td><td>2023-08-04</td><td>-</td><td>内部开发者预览，基于 OpenHarmony 3.2</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="双框架" data-i18n="section-dual">双框架</h2>
+<div class="table-responsive">
+<table>
+<thead><tr><th><span data-i18n="th-api">API</span></th><th><span data-i18n="th-version">对应系统版本</span></th><th><span data-i18n="th-date">发布时间</span></th><th><span data-i18n="th-android">支持的 Android 版本</span></th><th><span data-i18n="th-note">备注</span></th></tr></thead><tbody>
+<tr><td>-</td><td><b>HarmonyOS 4.5 (TV)</b> <sup class="beta">TV</sup></td><td>2024-09-24</td><td>Android 12</td><td>仅用于 Vision TV 系列智能电视</td></tr>
+<tr><td>-</td><td><b>HarmonyOS 4.3.1</b></td><td>2025-07-10</td><td>Android 12</td><td>持续支持中，最后的双框架 LTS 版本（EMUI 15 同源）</td></tr>
+<tr><td>-</td><td><b>HarmonyOS 4.3.0</b></td><td>2024-11-26</td><td>Android 12</td><td>Mate 70系列及Mate X6非先锋版SKU于2024年11月26日在中国上市</td></tr>
+<tr><td>10</td><td><b>HarmonyOS 4.2.0</b></td><td>2024-04-26</td><td>Android 12</td><td>Pura 70系列旗舰机型开箱即搭载HarmonyOS 4.2增量升级</td></tr>
+<tr><td>10</td><td><b>HarmonyOS 4.0.0</b></td><td>2023-08-18</td><td>Android 12</td><td>更高级的API级功能集、提升系统动画流畅度的改进以及用户界面的视觉优化</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_1_202305-0000001582097989-V2" target="_blank" rel="noopener">9</a></td><td><b>HarmonyOS 3.1</b></td><td>2023-05-15</td><td>Android 12</td><td>针对高通骁龙芯片优化，系统动画流畅度提升</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_1_202303-0000001553985573-V2" target="_blank" rel="noopener">9</a></td><td><b>HarmonyOS 3.1 Beta2</b></td><td>2023-04-19</td><td>Android 12</td><td>部分接口新增或变更</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_202302-0000001499901657-V2" target="_blank" rel="noopener">9</a></td><td><b>HarmonyOS 3.1 Beta1</b></td><td>2023-02-16</td><td>Android 12</td><td>部分接口新增或变更，以支持接口错误码</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_202211-0000001384974906-V2" target="_blank" rel="noopener">8</a></td><td><b>HarmonyOS 3.1 Developer Preview</b> <sup class="beta">PREVIEW</sup></td><td>2022-11-04</td><td>Android 12</td><td><span class="stable">ACTIVE</span>全新推出应用开发Stage模型</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_202209-0000001323985308-V2" target="_blank" rel="noopener">8</a></td><td><b>HarmonyOS 3.0.0</b></td><td>2022-09-06</td><td>Android 12</td><td><span class="stable">ACTIVE</span>引入声明式编程 (ArkTS)，增强超级设备互联互通；停止支持 Java 语言</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_202206-0000001273887550-V2" target="_blank" rel="noopener">7</a></td><td><b>HarmonyOS 3.0 Beta</b></td><td>2022-07-06</td><td>Android 12</td><td>本次发布HarmonyOS 3.0 Beta，可用于开发基于API Version 8的应用</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_202202-0000001193097180-V2" target="_blank" rel="noopener">7</a></td><td><b>HarmonyOS 3.0 Preview 2</b> <sup class="beta">PREVIEW</sup></td><td>2022-02-26</td><td>Android 12</td><td>新增两个TS的文本输入组件</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_202110-0000001167203136-V2" target="_blank" rel="noopener">7</a></td><td><b>HarmonyOS 3.0 Preview</b> <sup class="beta">PREVIEW</sup></td><td>2021-10-22</td><td>Android 12</td><td>JS UI正式命名为ArkUI</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_2_20210915-0000001153993146-V2" target="_blank" rel="noopener">6</a></td><td><b>HarmonyOS 2.2.0.3</b></td><td>2021-09-15</td><td>Android 10-11</td><td>混合双框架（Linux+AOSP），首次引入 HAP 应用格式，支持手机/平板/穿戴设备</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_2_20210625-0000001123724872-V2" target="_blank" rel="noopener">6</a></td><td><b>HarmonyOS 2.2.0.1 Beta</b></td><td>2021-06-25</td><td>Android 10-11</td><td>本次发布HarmonyOS SDK 2.2 Beta 1</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_2_202104-0000001104117222-V2" target="_blank" rel="noopener">5</a></td><td><b>HarmonyOS 2.1.1.20</b></td><td>2021-04-30</td><td>Android 10-11</td><td>本次发布HarmonyOS SDK 2.1 Release，较前一版本在接口内容上无新增和变更</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_2_202103-0000001139956937-V2" target="_blank" rel="noopener">5</a></td><td><b>HarmonyOS 2.x Beta</b></td><td>2021-03-21</td><td>Android 10-11</td><td>分布式和基础能力增强</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_2_202012-0000001139855219-V2" target="_blank" rel="noopener">4</a></td><td><b>HarmonyOS 2.x Beta</b></td><td>2020-12-16</td><td>Android 10-11</td><td>在前一版本基础上，更新对手机的支持，提供给开发者进行手机设备Beta</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_2_202009-0000001093177566-V2" target="_blank" rel="noopener">3</a></td><td><b>HarmonyOS 2.0.0 Beta</b></td><td>2020-09-11</td><td>Android 10-11</td><td>HarmonyOS 2.0首个Beta版本，支持更多的设备品类，包括华为智慧屏、智能穿戴、车机设备基于HarmonyOS进行开发者beta</td></tr>
+<tr><td>5</td><td><b>HarmonyOS 1.0.0</b></td><td>2019-08-09</td><td>Android 10</td><td>首代版本，基于 LiteOS+Linux 内核+AOSP 兼容层，仅用于智能电视和 IoT 设备</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="版本类型说明" data-i18n="section-notes">版本类型说明</h2>
+<div class="table-responsive">
+<table>
+<thead><tr><th><span data-i18n="th-type">类型</span></th><th><span data-i18n="th-desc">说明</span></th><th><span data-i18n="th-purpose">作用</span></th></tr></thead><tbody>
+<tr><td>Canary</td><td>早期体验版本，特性功能待稳定</td><td>可反馈问题，华为全力解决</td></tr>
+<tr><td>Beta</td><td>公开发布的Beta版本，特性功能待稳定</td><td>可反馈使用体验，改进产品</td></tr>
+<tr><td>Release</td><td>正式发布版本，承诺质量，特性功能稳定</td><td>可基于新功能完成开发，发布应用</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="数据来源">数据来源</h2>
+<p class="source-links">
+<a href="https://en.wikipedia.org/wiki/HarmonyOS_version_history" target="_blank" rel="noopener">Wikipedia: HarmonyOS version history</a>
+<a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/sdk-version-percentage" target="_blank" rel="noopener">华为开发者文档：SDK 版本使用率</a>
+</p>
+</div>
+</div>
+<div class="container">
+<div id="site-footer">
+<p>
+© 2026 <a href="https://github.com/secnotes" target="_blank">Security Notes</a>
+<span class="separator">|</span>
+<a href="https://github.com/secnotes/harmonyoslevel" target="_blank" class="github-link">
+<svg class="github-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.938 9.9 9.207 11.387.68.113.893-.261.893-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.218.694.825.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+Star on GitHub
+</a>
+</p>
+</div>
+</div>
+</body>
+</html>
