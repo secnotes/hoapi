@@ -34,7 +34,7 @@ def parse_device_md(md_content):
                 html_parts.append('</tbody></table></div>')
                 in_table = False
             section_title = stripped[3:]
-            html_parts.append(f'<h2 id="device-{section_title.lower()}">{section_title}</h2>')
+            html_parts.append(f'<h3 id="device-{section_title.lower()}">{section_title}</h3>')
             html_parts.append('<div class="table-responsive"><table>')
             html_parts.append('<thead><tr><th>设备系列</th><th>设备型号</th><th>型号代码</th><th>支持版本</th></tr></thead><tbody>')
             in_table = True
@@ -266,13 +266,11 @@ def md_to_html(md_content, device_content=None):
 
     # 添加设备支持清单
     if device_content:
-        html_parts.append('<hr style="margin-top: 3rem; margin-bottom: 2rem; border: none; border-top: 1px solid var(--border-color);">')
         device_title, device_html = parse_device_md(device_content)
         html_parts.append(f'<h2>{device_title}</h2>')
         html_parts.append(device_html)
 
     # 添加数据来源章节（放到最后）
-    html_parts.append('<hr style="margin-top: 3rem; margin-bottom: 2rem; border: none; border-top: 1px solid var(--border-color);">')
     html_parts.append('<h2>数据来源</h2>')
     html_parts.append('<p class="source-links">')
     for link in source_links:
@@ -323,6 +321,8 @@ def get_html_template():
         '    --paren-bg: #f3e5f5;',
         '    --milestone-color: #e65100;',
         '    --milestone-bg: #fff3e0;',
+        '    --title-gradient-1: rgba(0, 125, 255, 0.08);',
+        '    --title-gradient-2: rgba(96, 236, 173, 0.08);',
         '}',
 
         # 深色主题
@@ -347,6 +347,8 @@ def get_html_template():
         '    --paren-bg: #4a148c;',
         '    --milestone-color: #ffb74d;',
         '    --milestone-bg: #e65100;',
+        '    --title-gradient-1: rgba(100, 181, 246, 0.15);',
+        '    --title-gradient-2: rgba(0, 200, 83, 0.15);',
         '}',
 
         'body {',
@@ -360,10 +362,12 @@ def get_html_template():
         '}',
 
         '.container { max-width: 960px; margin: 0 auto; }',
-        '#site-title { font-size: 2.5rem; font-weight: 600; margin-bottom: 0.5rem; text-align: center; }',
+        '#site-title { font-size: 2.5rem; font-weight: 600; margin-bottom: 0.5rem; text-align: center; margin-top: 1rem; }',
         '#site-title a { color: var(--title-color); text-decoration: none; }',
-        'h2 { font-size: 1.5rem; font-weight: 600; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; }',
-        'h4 { font-size: 1.25rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.75rem; }',
+        'h2 { font-size: 1.5rem; font-weight: 600; margin-top: 2rem; margin-bottom: 1rem; padding: 0.75rem 1rem; background: linear-gradient(135deg, var(--title-gradient-1) 0%, var(--title-gradient-2) 100%); border-radius: 8px; }',
+        'h2 { font-size: 1.5rem; font-weight: 600; margin-top: 2rem; margin-bottom: 1rem; padding-bottom: 0.5rem; }',
+        'h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.75rem; }',
+        'h4 { font-size: 1rem; font-weight: 600; margin-top: 1rem; margin-bottom: 0.5rem; }',
         '#intro { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1.5rem; padding: 0.75rem 1rem 0.75rem 1.25rem; line-height: 1.7; border-left: 3px solid var(--link-color); background: linear-gradient(90deg, rgba(0, 125, 255, 0.05), transparent); text-align: left; }',
 
         # 主题切换按钮
@@ -439,7 +443,8 @@ def get_html_template():
         '@media (max-width: 768px) {',
         '    html { font-size: 14px; }',
         '    .container { padding: 0 1rem; }',
-        '    #site-title { font-size: 1.75rem; margin-bottom: 0.75rem; }',
+        '    #site-title { font-size: 1.75rem; margin-bottom: 0.75rem; margin-top: 0.5rem; }',
+        '    h2 { font-size: 1.25rem; margin-top: 1.5rem; padding: 0.5rem 0.75rem; }',
         '    h2 { font-size: 1.25rem; margin-top: 1.5rem; }',
         '    #intro { padding: 0.5rem 0.75rem; margin-bottom: 1rem; }',
         '    #theme-toggle { top: 0.5rem; right: 0.5rem; width: 36px; height: 36px; }',
@@ -461,6 +466,7 @@ def get_html_template():
         '@media (max-width: 480px) {',
         '    html { font-size: 13px; }',
         '    #site-title { font-size: 1.5rem; }',
+        '    h2 { font-size: 1.1rem; padding: 0.4rem 0.5rem; }',
         '    h2 { font-size: 1.1rem; }',
         '    th, td { padding: 0.4rem 0.5rem; font-size: 0.9rem; }',
         '    #lang-toggle { right: 2.5rem; }',

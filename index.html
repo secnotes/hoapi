@@ -29,6 +29,8 @@ html { font-size: 16px; }
     --paren-bg: #f3e5f5;
     --milestone-color: #e65100;
     --milestone-bg: #fff3e0;
+    --title-gradient-1: rgba(0, 125, 255, 0.08);
+    --title-gradient-2: rgba(96, 236, 173, 0.08);
 }
 [data-theme="dark"] {
     --bg-color: #1a1a2e;
@@ -51,6 +53,8 @@ html { font-size: 16px; }
     --paren-bg: #4a148c;
     --milestone-color: #ffb74d;
     --milestone-bg: #e65100;
+    --title-gradient-1: rgba(100, 181, 246, 0.15);
+    --title-gradient-2: rgba(0, 200, 83, 0.15);
 }
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -62,10 +66,11 @@ body {
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 .container { max-width: 960px; margin: 0 auto; }
-#site-title { font-size: 2.5rem; font-weight: 600; margin-bottom: 0.5rem; text-align: center; }
+#site-title { font-size: 2.5rem; font-weight: 600; margin-bottom: 0.5rem; text-align: center; margin-top: 1rem; }
 #site-title a { color: var(--title-color); text-decoration: none; }
-h2 { font-size: 1.5rem; font-weight: 600; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; }
-h4 { font-size: 1.25rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+h2 { font-size: 1.5rem; font-weight: 600; margin-top: 2rem; margin-bottom: 1rem; padding: 0.75rem 1rem; background: linear-gradient(135deg, var(--title-gradient-1) 0%, var(--title-gradient-2) 100%); border-radius: 8px; }
+h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+h4 { font-size: 1rem; font-weight: 600; margin-top: 1rem; margin-bottom: 0.5rem; }
 #intro { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1.5rem; padding: 0.75rem 1rem 0.75rem 1.25rem; line-height: 1.7; border-left: 3px solid var(--link-color); background: linear-gradient(90deg, rgba(0, 125, 255, 0.05), transparent); text-align: left; }
 #theme-toggle { position: fixed; top: 1rem; right: 1rem; background: var(--table-header-bg); border: 1px solid var(--border-color); border-radius: 50%; width: 44px; height: 44px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; transition: all 0.3s ease; z-index: 1000; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 #theme-toggle:hover { transform: scale(1.1); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
@@ -128,8 +133,8 @@ table a:hover { text-decoration: underline; }
 @media (max-width: 768px) {
     html { font-size: 14px; }
     .container { padding: 0 1rem; }
-    #site-title { font-size: 1.75rem; margin-bottom: 0.75rem; }
-    h2 { font-size: 1.25rem; margin-top: 1.5rem; }
+    #site-title { font-size: 1.75rem; margin-bottom: 0.75rem; margin-top: 0.5rem; }
+    h2 { font-size: 1.25rem; margin-top: 1.5rem; padding: 0.5rem 0.75rem; }
     #intro { padding: 0.5rem 0.75rem; margin-bottom: 1rem; }
     #theme-toggle { top: 0.5rem; right: 0.5rem; width: 36px; height: 36px; }
     #theme-toggle svg { width: 18px; height: 18px; }
@@ -151,7 +156,7 @@ table a:hover { text-decoration: underline; }
 @media (max-width: 480px) {
     html { font-size: 13px; }
     #site-title { font-size: 1.5rem; }
-    h2 { font-size: 1.1rem; }
+    h2 { font-size: 1.1rem; padding: 0.4rem 0.5rem; }
     th, td { padding: 0.4rem 0.5rem; font-size: 0.9rem; }
     #lang-toggle { right: 2.5rem; }
     #toc ul { flex-direction: column; gap: 0.25rem; }
@@ -322,9 +327,8 @@ table a:hover { text-decoration: underline; }
 </tbody>
 </table>
 </div>
-<hr style="margin-top: 3rem; margin-bottom: 2rem; border: none; border-top: 1px solid var(--border-color);">
 <h2>HarmonyOS 支持设备型号清单</h2>
-<h2 id="device-手机">手机</h2>
+<h3 id="device-手机">手机</h3>
 <div class="table-responsive"><table>
 <thead><tr><th>设备系列</th><th>设备型号</th><th>型号代码</th><th>支持版本</th></tr></thead><tbody>
 <tr><td><b>Mate 60系列</b></td><td>Mate 60</td><td>BRA-AL00</td><td>6.0.2</td></tr>
@@ -384,7 +388,7 @@ table a:hover { text-decoration: underline; }
 <tr><td></td><td>nova 14 Pro</td><td>MIA-AL00</td><td>6.0.0</td></tr>
 <tr><td></td><td>nova 14 Ultra</td><td>MRT-AL10</td><td>6.0.0</td></tr>
 </tbody></table></div>
-<h2 id="device-平板">平板</h2>
+<h3 id="device-平板">平板</h3>
 <div class="table-responsive"><table>
 <thead><tr><th>设备系列</th><th>设备型号</th><th>型号代码</th><th>支持版本</th></tr></thead><tbody>
 <tr><td><b>其他</b></td><td>MatePad 11.5 S 2025</td><td>SLG-W50</td><td>5.0.5</td></tr>
@@ -401,20 +405,20 @@ table a:hover { text-decoration: underline; }
 <tr><td></td><td>MatePad Pro 13.2 英寸 2023 典藏版</td><td>PCE-AL40</td><td>6.0.1</td></tr>
 <tr><td></td><td>MatePad Pro 13.2 英寸 2025</td><td>WEB-AL00, WEB-AL10, WEB-W00, WEB-W10</td><td>6.0.2</td></tr>
 </tbody></table></div>
-<h2 id="device-pc">PC</h2>
+<h3 id="device-pc">PC</h3>
 <div class="table-responsive"><table>
 <thead><tr><th>设备系列</th><th>设备型号</th><th>型号代码</th><th>支持版本</th></tr></thead><tbody>
 <tr><td><b>其他</b></td><td>MateBook Fold 非凡大师</td><td>HPR-W72</td><td>6.0.2</td></tr>
 <tr><td></td><td>MateBook Pro</td><td>HAD-W32</td><td>6.0.2</td></tr>
 </tbody></table></div>
-<h2 id="device-穿戴">穿戴</h2>
+<h3 id="device-穿戴">穿戴</h3>
 <div class="table-responsive"><table>
 <thead><tr><th>设备系列</th><th>设备型号</th><th>型号代码</th><th>支持版本</th></tr></thead><tbody>
 <tr><td><b>WATCH 5系列</b></td><td>WATCH ULTIMATE DESIGN</td><td>-</td><td>6.0.1</td></tr>
 <tr><td></td><td>WATCH Ultimate 2</td><td>-</td><td>6.0.1</td></tr>
 <tr><td><b>其他</b></td><td>WATCH 5</td><td>-</td><td>5.1.0</td></tr>
 </tbody></table></div>
-<h2 id="device-iot">IoT</h2>
+<h3 id="device-iot">IoT</h3>
 <div class="table-responsive"><table>
 <thead><tr><th>设备系列</th><th>设备型号</th><th>型号代码</th><th>支持版本</th></tr></thead><tbody>
 <tr><td><b>MateTV系列</b></td><td>MateTV 65英寸</td><td>HD65EDIH</td><td>5.1.1</td></tr>
@@ -425,7 +429,6 @@ table a:hover { text-decoration: underline; }
 <tr><td></td><td>MateTV Pro 85英寸</td><td>HD8XEDIJ</td><td>5.1.1</td></tr>
 <tr><td></td><td>MateTV Pro 98英寸</td><td>HD98EDIJ</td><td>5.1.1</td></tr>
 </tbody></table></div>
-<hr style="margin-top: 3rem; margin-bottom: 2rem; border: none; border-top: 1px solid var(--border-color);">
 <h2>数据来源</h2>
 <p class="source-links">
 <a href="https://en.wikipedia.org/wiki/HarmonyOS_version_history" target="_blank" rel="noopener">Wikipedia: HarmonyOS version history</a>
