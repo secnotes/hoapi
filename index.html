@@ -69,6 +69,7 @@ body {
 #site-title { font-size: 2.5rem; font-weight: 600; margin-bottom: 0.5rem; text-align: center; margin-top: 1rem; }
 #site-title a { color: var(--title-color); text-decoration: none; }
 h2 { font-size: 1.5rem; font-weight: 600; margin-top: 2rem; margin-bottom: 1rem; padding: 0.75rem 1rem; background: linear-gradient(135deg, var(--title-gradient-1) 0%, var(--title-gradient-2) 100%); border-radius: 8px; }
+h2 { font-size: 1.5rem; font-weight: 600; margin-top: 2rem; margin-bottom: 1rem; padding-bottom: 0.5rem; }
 h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.75rem; }
 h4 { font-size: 1rem; font-weight: 600; margin-top: 1rem; margin-bottom: 0.5rem; }
 #intro { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1.5rem; padding: 0.75rem 1rem 0.75rem 1.25rem; line-height: 1.7; border-left: 3px solid var(--link-color); background: linear-gradient(90deg, rgba(0, 125, 255, 0.05), transparent); text-align: left; }
@@ -119,7 +120,6 @@ table a:hover { text-decoration: underline; }
 .source-links a { color: var(--link-color); text-decoration: none; display: inline-block; margin-right: 1.5rem; }
 .source-links a:hover { text-decoration: underline; }
 .source-links a::before { content: "→ "; color: var(--text-secondary); }
-/* 目录样式 */
 #toc { background-color: var(--table-header-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem 1.5rem; margin-bottom: 2rem; }
 #toc h3 { font-size: 1rem; font-weight: 600; margin: 0 0 0.75rem 0; color: var(--text-color); }
 #toc ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; }
@@ -128,13 +128,12 @@ table a:hover { text-decoration: underline; }
 #toc a:hover { text-decoration: underline; }
 #toc .toc-section { font-weight: 600; }
 #toc .toc-sub { color: var(--text-secondary); font-weight: 400; }
-
-/* 移动端响应式样式 */
 @media (max-width: 768px) {
     html { font-size: 14px; }
     .container { padding: 0 1rem; }
     #site-title { font-size: 1.75rem; margin-bottom: 0.75rem; margin-top: 0.5rem; }
     h2 { font-size: 1.25rem; margin-top: 1.5rem; padding: 0.5rem 0.75rem; }
+    h2 { font-size: 1.25rem; margin-top: 1.5rem; }
     #intro { padding: 0.5rem 0.75rem; margin-bottom: 1rem; }
     #theme-toggle { top: 0.5rem; right: 0.5rem; width: 36px; height: 36px; }
     #theme-toggle svg { width: 18px; height: 18px; }
@@ -152,11 +151,11 @@ table a:hover { text-decoration: underline; }
     #site-footer { margin-top: 30px; padding: 20px 15px; }
     .source-links a { margin-right: 0.75rem; font-size: 0.85rem; }
 }
-
 @media (max-width: 480px) {
     html { font-size: 13px; }
     #site-title { font-size: 1.5rem; }
     h2 { font-size: 1.1rem; padding: 0.4rem 0.5rem; }
+    h2 { font-size: 1.1rem; }
     th, td { padding: 0.4rem 0.5rem; font-size: 0.9rem; }
     #lang-toggle { right: 2.5rem; }
     #toc ul { flex-direction: column; gap: 0.25rem; }
@@ -270,7 +269,7 @@ table a:hover { text-decoration: underline; }
 <div class="table-responsive">
 <table>
 <thead><tr><th><span data-i18n="th-api">API</span></th><th><span data-i18n="th-version">对应系统版本</span></th><th><span data-i18n="th-date">发布时间</span></th><th><span data-i18n="th-usage">使用率</span></th><th><span data-i18n="th-note">备注</span></th></tr></thead><tbody>
-<tr><td>23</td><td><b>HarmonyOS 6.1</b> <sup class="beta">PREVIEW</sup></td><td>2026-Q2（预计）</td><td>-</td><td>预览版本，支持 PC 模式与 Linux 工具集成</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-602" target="_blank" rel="noopener">23</a></td><td><b>HarmonyOS 6.1</b> <sup class="beta">PREVIEW</sup></td><td>2026-04-20</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 12.26%, var(--usage-bar-end) 12.26%);">12.26%</td><td>开发能力得到进一步增强</td></tr>
 <tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-602" target="_blank" rel="noopener">22</a></td><td><b>HarmonyOS 6.0.2</b> <sup class="milestone">里程碑</sup></td><td>2026-01-21</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 84.38%, var(--usage-bar-end) 84.38%);">84.38%</td><td><strong>最新稳定版，移除"NEXT"后缀，统一全设备框架</strong></td></tr>
 <tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-601" target="_blank" rel="noopener">21</a></td><td><b>HarmonyOS 6.0.1</b></td><td>2025-11-20</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 1.37%, var(--usage-bar-end) 1.37%);">1.37%</td><td>基于 API 21，无行为变更，稳定性增强</td></tr>
 <tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-600" target="_blank" rel="noopener">20</a></td><td><b>HarmonyOS 6.0.0</b></td><td>2025-09-25</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.25%, var(--usage-bar-end) 0.25%);">0.25%</td><td>新增"碰一碰"连接、企业空间 Kit、屏幕时间管理、AI 照片编辑工具</td></tr>
@@ -331,53 +330,63 @@ table a:hover { text-decoration: underline; }
 <h3 id="device-手机">手机</h3>
 <div class="table-responsive"><table>
 <thead><tr><th>设备系列</th><th>设备型号</th><th>型号代码</th><th>支持版本</th></tr></thead><tbody>
-<tr><td><b>Mate 60系列</b></td><td>Mate 60</td><td>BRA-AL00</td><td>6.0.2</td></tr>
-<tr><td></td><td>Mate 60 Pro</td><td>ALN-AL00, ALN-AL80</td><td>6.0.2</td></tr>
-<tr><td></td><td>Mate 60 Pro+</td><td>ALN-AL10</td><td>6.0.1</td></tr>
-<tr><td></td><td>Mate 60 RS 非凡大师</td><td>ALN-AL10</td><td>6.0.1</td></tr>
-<tr><td><b>Mate 70系列</b></td><td>Mate 70</td><td>CLS-AL00</td><td>6.0.2</td></tr>
-<tr><td></td><td>Mate 70 Pro</td><td>PLR-AL00</td><td>6.0.2</td></tr>
-<tr><td></td><td>Mate 70 Pro 优享版</td><td>PLR-AL50</td><td>6.0.1</td></tr>
-<tr><td></td><td>Mate 70 Pro+</td><td>PLR-AL10</td><td>6.0.1</td></tr>
-<tr><td></td><td>Mate 70 RS 非凡大师</td><td>PLU-AL10</td><td>6.0.1</td></tr>
-<tr><td><b>Mate X5系列</b></td><td>Mate X5</td><td>ALT-AL10</td><td>6.0.2</td></tr>
-<tr><td></td><td>Mate X5 典藏版</td><td>ALT-AL10</td><td>6.0.2</td></tr>
-<tr><td><b>Mate X6系列</b></td><td>Mate X6</td><td>ICL-AL10</td><td>6.0.1</td></tr>
-<tr><td></td><td>Mate X6 典藏版</td><td>ICL-AL20</td><td>6.0.1</td></tr>
-<tr><td><b>Mate X7系列</b></td><td>Mate X7</td><td>DEL-AL10</td><td>6.0.1</td></tr>
-<tr><td></td><td>Mate X7 典藏版</td><td>DEL-AL20</td><td>6.0.1</td></tr>
+<tr><td><b>Mate 60系列</b></td><td>Mate 60</td><td>BRA-AL00</td><td>6.1.0</td></tr>
+<tr><td></td><td>Mate 60 Pro</td><td>ALN-AL00, ALN-AL80</td><td>6.1.0</td></tr>
+<tr><td></td><td>Mate 60 Pro+</td><td>ALN-AL10</td><td>6.1.0</td></tr>
+<tr><td></td><td>Mate 60 RS 非凡大师</td><td>ALN-AL10</td><td>6.1.0</td></tr>
+<tr><td><b>Mate 70系列</b></td><td>Mate 70</td><td>CLS-AL00, CLS-AL30</td><td>6.1.0</td></tr>
+<tr><td></td><td>Mate 70 Air</td><td>SUP-AL90, SUP-AL90a</td><td>6.1.0</td></tr>
+<tr><td></td><td>Mate 70 Pro</td><td>PLR-AL00, PLR-AL30</td><td>6.1.0</td></tr>
+<tr><td></td><td>Mate 70 Pro 优享版</td><td>PLR-AL50</td><td>6.1.0</td></tr>
+<tr><td></td><td>Mate 70 Pro+</td><td>PLR-AL10</td><td>6.1.0</td></tr>
+<tr><td></td><td>Mate 70 RS 非凡大师</td><td>PLU-AL10</td><td>6.1.0</td></tr>
+<tr><td><b>Mate 80系列</b></td><td>Mate 80</td><td>VYG-AL00, VYG-AL30</td><td>6.1.0</td></tr>
+<tr><td></td><td>Mate 80 Pro</td><td>SGT-AL00, SGT-AL50</td><td>6.1.0</td></tr>
+<tr><td></td><td>Mate 80 Pro Max</td><td>SGT-AL10</td><td>6.1.0</td></tr>
+<tr><td></td><td>Mate 80 RS 非凡大师</td><td>SGU-AL10</td><td>6.1.0</td></tr>
+<tr><td><b>Mate X5系列</b></td><td>Mate X5</td><td>ALT-AL10</td><td>6.1.0</td></tr>
+<tr><td></td><td>Mate X5 典藏版</td><td>ALT-AL10</td><td>6.1.0</td></tr>
+<tr><td><b>Mate X6系列</b></td><td>Mate X6</td><td>ICL-AL10</td><td>6.1.0</td></tr>
+<tr><td></td><td>Mate X6 典藏版</td><td>ICL-AL20</td><td>6.1.0</td></tr>
+<tr><td><b>Mate X7系列</b></td><td>Mate X7</td><td>DEL-AL10</td><td>6.1.0</td></tr>
+<tr><td></td><td>Mate X7 典藏版</td><td>DEL-AL20</td><td>6.1.0</td></tr>
 <tr><td><b>Mate XTs系列</b></td><td>Mate XTs 非凡大师</td><td>GRL-AL20</td><td>5.1.1</td></tr>
-<tr><td><b>Mate XT系列</b></td><td>Mate XT 非凡大师</td><td>GRL-AL10D</td><td>6.0.2</td></tr>
-<tr><td></td><td>Mate XTs 非凡大师</td><td>GRL-AL20</td><td>6.0.1</td></tr>
-<tr><td><b>Pocket 2系列</b></td><td>Pocket 2</td><td>LEM-AL00</td><td>6.0.1</td></tr>
-<tr><td></td><td>Pocket 2 优享版</td><td>LEM-AL50</td><td>6.0.1</td></tr>
-<tr><td></td><td>Pocket 2 艺术定制版</td><td>LEM-AL00</td><td>6.0.1</td></tr>
-<tr><td><b>Pura 70系列</b></td><td>Pura 70</td><td>ADY-AL00</td><td>6.0.1</td></tr>
-<tr><td></td><td>Pura 70 Pro</td><td>HBN-AL00</td><td>6.0.1</td></tr>
-<tr><td></td><td>Pura 70 Pro+</td><td>HBN-AL10, HBN-AL80</td><td>6.0.1</td></tr>
-<tr><td></td><td>Pura 70 Ultra</td><td>HBP-AL00</td><td>6.0.1</td></tr>
-<tr><td></td><td>Pura 70 北斗卫星消息版</td><td>ADY-AL10</td><td>6.0.1</td></tr>
-<tr><td><b>Pura 80系列</b></td><td>Pura 80</td><td>HED-AL00</td><td>6.0.1</td></tr>
-<tr><td></td><td>Pura 80 Pro</td><td>LMR-AL00</td><td>6.0.1</td></tr>
-<tr><td></td><td>Pura 80 Pro+</td><td>LMR-AL10</td><td>6.0.1</td></tr>
-<tr><td></td><td>Pura 80 Ultra</td><td>LMR-AL10</td><td>6.0.1</td></tr>
-<tr><td><b>Pura X系列</b></td><td>Pura X</td><td>VDE-AL00</td><td>6.0.2</td></tr>
-<tr><td></td><td>Pura X 典藏版</td><td>VDE-AL10</td><td>6.0.2</td></tr>
-<tr><td><b>nova 12 系列</b></td><td>nova 12</td><td>BLK-AL00</td><td>6.0.1</td></tr>
-<tr><td></td><td>nova 12 Pro</td><td>ADA-AL00</td><td>6.0.1</td></tr>
-<tr><td></td><td>nova 12 Ultra</td><td>ADA-AL00U</td><td>6.0.1</td></tr>
-<tr><td></td><td>nova 12 Ultra 星耀版</td><td>ADA-AL10U</td><td>6.0.1</td></tr>
-<tr><td><b>nova 13 系列</b></td><td>nova 13</td><td>BLK-AL80</td><td>6.0.1</td></tr>
-<tr><td></td><td>nova 13 Pro</td><td>MIS-AL00</td><td>6.0.1</td></tr>
-<tr><td><b>nova 14 系列</b></td><td>nova 14</td><td>TLR-AL00</td><td>6.0.1</td></tr>
-<tr><td></td><td>nova 14 Pro</td><td>MIA-AL00</td><td>6.0.1</td></tr>
-<tr><td></td><td>nova 14 Ultra</td><td>MRT-AL10</td><td>6.0.1</td></tr>
-<tr><td></td><td>nova 14 活力版</td><td>TYR-AL00</td><td>6.0.1</td></tr>
-<tr><td><b>nova 15 系列</b></td><td>nova 15</td><td>PSN-AL00</td><td>6.0.1</td></tr>
-<tr><td></td><td>nova 15 Ultra</td><td>SLY-AL00</td><td>6.0.1</td></tr>
-<tr><td></td><td>nova 15 pro</td><td>KLE-AL00U</td><td>6.0.1</td></tr>
-<tr><td><b>nova Flip系列</b></td><td>nova Flip</td><td>PSD-AL00</td><td>6.0.1</td></tr>
-<tr><td></td><td>nova Flip S</td><td>PSD-AL80</td><td>6.0.1</td></tr>
+<tr><td><b>Mate XT系列</b></td><td>Mate XT 非凡大师</td><td>GRL-AL10</td><td>6.1.0</td></tr>
+<tr><td></td><td>Mate XTs 非凡大师</td><td>GRL-AL20</td><td>6.1.0</td></tr>
+<tr><td><b>Pocket 2系列</b></td><td>Pocket 2</td><td>LEM-AL00</td><td>6.1.0</td></tr>
+<tr><td></td><td>Pocket 2 优享版</td><td>LEM-AL50</td><td>6.1.0</td></tr>
+<tr><td></td><td>Pocket 2 艺术定制版</td><td>LEM-AL00</td><td>6.1.0</td></tr>
+<tr><td><b>Pura 70系列</b></td><td>Pura 70</td><td>ADY-AL00</td><td>6.1.0</td></tr>
+<tr><td></td><td>Pura 70 Pro</td><td>HBN-AL00</td><td>6.1.0</td></tr>
+<tr><td></td><td>Pura 70 Pro+</td><td>HBN-AL10, HBN-AL80</td><td>6.1.0</td></tr>
+<tr><td></td><td>Pura 70 Ultra</td><td>HBP-AL00</td><td>6.1.0</td></tr>
+<tr><td></td><td>Pura 70 北斗卫星消息版</td><td>ADY-AL10</td><td>6.1.0</td></tr>
+<tr><td><b>Pura 80系列</b></td><td>Pura 80</td><td>HED-AL00</td><td>6.1.0</td></tr>
+<tr><td></td><td>Pura 80 Pro</td><td>LMR-AL00</td><td>6.1.0</td></tr>
+<tr><td></td><td>Pura 80 Pro+</td><td>LMR-AL10</td><td>6.1.0</td></tr>
+<tr><td></td><td>Pura 80 Ultra</td><td>LMR-AL10</td><td>6.1.0</td></tr>
+<tr><td><b>Pura 90系列</b></td><td>Pura 90</td><td>KEE-AL00</td><td>6.1.0</td></tr>
+<tr><td></td><td>Pura 90 Pro</td><td>MLN-AL00</td><td>6.1.0</td></tr>
+<tr><td></td><td>Pura 90 Pro Max</td><td>SCA-AL00</td><td>6.1.0</td></tr>
+<tr><td><b>Pura X Max系列</b></td><td>Pura X Max</td><td>HOP-AL00</td><td>6.1.0</td></tr>
+<tr><td></td><td>Pura X Max 典藏版</td><td>HOP-AL10</td><td>6.1.0</td></tr>
+<tr><td><b>Pura X系列</b></td><td>Pura X</td><td>VDE-AL00</td><td>6.1.0</td></tr>
+<tr><td></td><td>Pura X 典藏版</td><td>VDE-AL10</td><td>6.1.0</td></tr>
+<tr><td><b>nova 12 系列</b></td><td>nova 12</td><td>BLK-AL00</td><td>6.1.0</td></tr>
+<tr><td></td><td>nova 12 Pro</td><td>ADA-AL00</td><td>6.1.0</td></tr>
+<tr><td></td><td>nova 12 Ultra</td><td>ADA-AL00U</td><td>6.1.0</td></tr>
+<tr><td></td><td>nova 12 Ultra 星耀版</td><td>ADA-AL10U</td><td>6.1.0</td></tr>
+<tr><td><b>nova 13 系列</b></td><td>nova 13</td><td>BLK-AL80</td><td>6.1.0</td></tr>
+<tr><td></td><td>nova 13 Pro</td><td>MIS-AL00</td><td>6.1.0</td></tr>
+<tr><td><b>nova 14 系列</b></td><td>nova 14</td><td>TLR-AL00</td><td>6.1.0</td></tr>
+<tr><td></td><td>nova 14 Pro</td><td>MIA-AL00</td><td>6.1.0</td></tr>
+<tr><td></td><td>nova 14 Ultra</td><td>MRT-AL10</td><td>6.1.0</td></tr>
+<tr><td></td><td>nova 14 活力版</td><td>TYR-AL00</td><td>6.1.0</td></tr>
+<tr><td><b>nova 15 系列</b></td><td>nova 15</td><td>PSN-AL00</td><td>6.1.0</td></tr>
+<tr><td></td><td>nova 15 Ultra</td><td>SLY-AL00</td><td>6.1.0</td></tr>
+<tr><td></td><td>nova 15 pro</td><td>KLE-AL00U</td><td>6.1.0</td></tr>
+<tr><td><b>nova Flip系列</b></td><td>nova Flip</td><td>PSD-AL00</td><td>6.1.0</td></tr>
+<tr><td></td><td>nova Flip S</td><td>PSD-AL80</td><td>6.1.0</td></tr>
 <tr><td><b>nova12 系列</b></td><td>nova 12</td><td>BLK-AL00</td><td>6.0.0</td></tr>
 <tr><td></td><td>nova 12 Pro</td><td>ADA-AL00</td><td>6.0.0</td></tr>
 <tr><td></td><td>nova 12 Ultra</td><td>ADA-AL00U</td><td>6.0.0</td></tr>
@@ -391,25 +400,29 @@ table a:hover { text-decoration: underline; }
 <h3 id="device-平板">平板</h3>
 <div class="table-responsive"><table>
 <thead><tr><th>设备系列</th><th>设备型号</th><th>型号代码</th><th>支持版本</th></tr></thead><tbody>
-<tr><td><b>其他</b></td><td>MatePad 11.5 S 2025</td><td>SLG-W50</td><td>5.0.5</td></tr>
-<tr><td></td><td>MatePad 11.5 S 2025款</td><td>SLG-W00</td><td>6.0.1</td></tr>
+<tr><td><b>其他</b></td><td>MatePad 11.5 2026款</td><td>TXZ-W10, TXZ-W20, TXZ-AL10</td><td>6.1.0</td></tr>
+<tr><td></td><td>MatePad 11.5 S</td><td>TGR-W00/W00G, TGR-W10/W10G, TGR-W20, TGR-W40</td><td>6.1.0</td></tr>
+<tr><td></td><td>MatePad 11.5 S 2025</td><td>SLG-W50</td><td>5.0.5</td></tr>
+<tr><td></td><td>MatePad 11.5 S 2025款</td><td>SLG-W00, SLG-W30, SLG-W60</td><td>6.1.0</td></tr>
 <tr><td></td><td>MatePad Air 12 英寸 2025</td><td>LRT-W00</td><td>5.0.5</td></tr>
-<tr><td></td><td>MatePad Air 12英寸  2025</td><td>LRT-W00</td><td>6.0.1</td></tr>
-<tr><td></td><td>MatePad Edge</td><td>QXS-W00, QXS-W10, QXS-W20</td><td>5.1.1</td></tr>
-<tr><td></td><td>MatePad Mini</td><td>MLR-AL10</td><td>6.0.1</td></tr>
-<tr><td></td><td>MatePad Mini 悦读版</td><td>MLR-AL00</td><td>6.0.1</td></tr>
-<tr><td></td><td>MatePad Pro 11 英寸 2024</td><td>XYAO-W00</td><td>6.0.2</td></tr>
-<tr><td></td><td>MatePad Pro 12.2 英寸 2024</td><td>MRO-AL10, MRO-W00, MRO-W10</td><td>6.0.1</td></tr>
-<tr><td></td><td>MatePad Pro 12.2 英寸 2025</td><td>MRDI-W00, MRDI-W10, MRDI-W20</td><td>6.0.1</td></tr>
-<tr><td></td><td>MatePad Pro 13.2 英寸 2023</td><td>PCE-AL30, PCE-W30, PCE-W40</td><td>6.0.1</td></tr>
-<tr><td></td><td>MatePad Pro 13.2 英寸 2023 典藏版</td><td>PCE-AL40</td><td>6.0.1</td></tr>
-<tr><td></td><td>MatePad Pro 13.2 英寸 2025</td><td>WEB-AL00, WEB-AL10, WEB-W00, WEB-W10</td><td>6.0.2</td></tr>
+<tr><td></td><td>MatePad Air 12英寸  2024</td><td>BKY-W00, BKY-W10, BKY-W20, BKY-W21</td><td>6.1.0</td></tr>
+<tr><td></td><td>MatePad Air 12英寸  2025</td><td>LRT-W00, LRT-W20, LRT-W30</td><td>6.1.0</td></tr>
+<tr><td></td><td>MatePad Edge</td><td>QXS-W00, QXS-W10, QXS-W20</td><td>6.1.0</td></tr>
+<tr><td></td><td>MatePad Mini</td><td>MLR-AL10</td><td>6.1.0</td></tr>
+<tr><td></td><td>MatePad Mini 悦读版</td><td>MLR-AL00</td><td>6.1.0</td></tr>
+<tr><td></td><td>MatePad Pro 11 英寸 2024</td><td>XYAO-W00</td><td>6.1.0</td></tr>
+<tr><td></td><td>MatePad Pro 12.2 英寸 2024</td><td>MRO-AL10, MRO-W00, MRO-W10</td><td>6.1.0</td></tr>
+<tr><td></td><td>MatePad Pro 12.2 英寸 2025</td><td>MRDI-W00, MRDI-W10, MRDI-W20</td><td>6.1.0</td></tr>
+<tr><td></td><td>MatePad Pro 13.2 英寸 2023</td><td>PCE-AL30, PCE-W30, PCE-W40</td><td>6.1.0</td></tr>
+<tr><td></td><td>MatePad Pro 13.2 英寸 2023 典藏版</td><td>PCE-AL40</td><td>6.1.0</td></tr>
+<tr><td></td><td>MatePad Pro 13.2 英寸 2025</td><td>WEB-AL00, WEB-AL10, WEB-W00, WEB-W10</td><td>6.1.0</td></tr>
 </tbody></table></div>
 <h3 id="device-pc">PC</h3>
 <div class="table-responsive"><table>
 <thead><tr><th>设备系列</th><th>设备型号</th><th>型号代码</th><th>支持版本</th></tr></thead><tbody>
-<tr><td><b>其他</b></td><td>MateBook Fold 非凡大师</td><td>HPR-W72</td><td>6.0.2</td></tr>
-<tr><td></td><td>MateBook Pro</td><td>HAD-W32</td><td>6.0.2</td></tr>
+<tr><td><b>其他</b></td><td>HUAWEI MateBook 14</td><td>MNT-W54C</td><td>6.1.0</td></tr>
+<tr><td></td><td>MateBook Fold 非凡大师</td><td>HPR-W72</td><td>6.1.0</td></tr>
+<tr><td></td><td>MateBook Pro</td><td>HAD-W32</td><td>6.1.0</td></tr>
 </tbody></table></div>
 <h3 id="device-穿戴">穿戴</h3>
 <div class="table-responsive"><table>

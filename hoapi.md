@@ -2,7 +2,7 @@
 
 | API | 对应系统版本 | 发布时间 | 使用率 | 备注 |
 |-----|-------------|---------|--------|------|
-| 23 | HarmonyOS 6.1 Preview | 2026-Q2（预计） | - | 预览版本，支持 PC 模式与 Linux 工具集成 |
+| [23](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-602) | HarmonyOS 6.1 Preview | 2026-04-20 | 12.26% | 开发能力得到进一步增强 |
 | [22](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-602) | HarmonyOS 6.0.2 | 2026-01-21 | 84.38% | **最新稳定版，移除"NEXT"后缀，统一全设备框架** |
 | [21](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-601) | HarmonyOS 6.0.1 | 2025-11-20 | 1.37% | 基于 API 21，无行为变更，稳定性增强 |
 | [20](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-600) | HarmonyOS 6.0.0 | 2025-09-25 | 0.25% | 新增"碰一碰"连接、企业空间 Kit、屏幕时间管理、AI 照片编辑工具 |
