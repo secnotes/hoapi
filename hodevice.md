@@ -1,7 +1,7 @@
 # HarmonyOS 支持设备型号清单
 
 > 数据来源: https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/support-device
-> 更新时间: 2026-04-20
+> 更新时间: 2026-04-27
 
 ## 手机
 
@@ -49,30 +49,21 @@
 | | Pura X Max 典藏版 | HOP-AL10 | 6.1.0 |
 | Pura X系列 | Pura X | VDE-AL00 | 6.1.0 |
 | | Pura X 典藏版 | VDE-AL10 | 6.1.0 |
-| nova 12 系列 | nova 12 | BLK-AL00 | 6.1.0 |
+| nova 12系列 | nova 12 | BLK-AL00 | 6.1.0 |
 | | nova 12 Pro | ADA-AL00 | 6.1.0 |
 | | nova 12 Ultra | ADA-AL00U | 6.1.0 |
 | | nova 12 Ultra 星耀版 | ADA-AL10U | 6.1.0 |
-| nova 13 系列 | nova 13 | BLK-AL80 | 6.1.0 |
+| nova 13系列 | nova 13 | BLK-AL80 | 6.1.0 |
 | | nova 13 Pro | MIS-AL00 | 6.1.0 |
-| nova 14 系列 | nova 14 | TLR-AL00 | 6.1.0 |
+| nova 14系列 | nova 14 | TLR-AL00 | 6.1.0 |
 | | nova 14 Pro | MIA-AL00 | 6.1.0 |
 | | nova 14 Ultra | MRT-AL10 | 6.1.0 |
 | | nova 14 活力版 | TYR-AL00 | 6.1.0 |
-| nova 15 系列 | nova 15 | PSN-AL00 | 6.1.0 |
+| nova 15系列 | nova 15 | PSN-AL00 | 6.1.0 |
 | | nova 15 Ultra | SLY-AL00 | 6.1.0 |
 | | nova 15 pro | KLE-AL00U | 6.1.0 |
 | nova Flip系列 | nova Flip | PSD-AL00 | 6.1.0 |
 | | nova Flip S | PSD-AL80 | 6.1.0 |
-| nova12 系列 | nova 12 | BLK-AL00 | 6.0.0 |
-| | nova 12 Pro | ADA-AL00 | 6.0.0 |
-| | nova 12 Ultra | ADA-AL00U | 6.0.0 |
-| | nova 12 Ultra 星耀版 | ADA-AL10U | 6.0.0 |
-| nova13 系列 | nova 13 | BLK-AL80 | 6.0.0 |
-| | nova 13 Pro | MIS-AL00 | 6.0.0 |
-| nova14 系列 | nova 14 | TLR-AL00 | 6.0.0 |
-| | nova 14 Pro | MIA-AL00 | 6.0.0 |
-| | nova 14 Ultra | MRT-AL10 | 6.0.0 |
 
 ## 平板
 

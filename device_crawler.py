@@ -227,6 +227,27 @@ def parse_table(table):
     return devices
 
 
+def normalize_series_name(series):
+    """标准化设备系列名称，合并命名不一致的系列"""
+    import re
+
+    # 处理 nova 系列命名不一致：nova12/nova 12 -> nova 12系列
+    nova_match = re.match(r'^nova\s*(\d+)\s*系列$', series)
+    if nova_match:
+        num = nova_match.group(1)
+        return f'nova {num}系列'
+
+    # 处理 nova Flip 系列命名
+    nova_flip_match = re.match(r'^nova\s*Flip\s*系列$', series)
+    if nova_flip_match:
+        return 'nova Flip系列'
+
+    # 处理 MatePad 等可能有空格差异的系列
+    series = re.sub(r'\s+', ' ', series.strip())
+
+    return series
+
+
 def generate_markdown(data, output_file='hodevice.md'):
     """生成 Markdown 文件"""
     lines = []
@@ -260,6 +281,8 @@ def generate_markdown(data, output_file='hodevice.md'):
         for version in versions:
             for device in data[device_type][version]:
                 device['version'] = version
+                # 标准化设备系列名称
+                device['series'] = normalize_series_name(device['series'])
                 all_devices.append(device)
 
         # 按系列和版本排序
