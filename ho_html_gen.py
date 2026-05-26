@@ -82,6 +82,35 @@ def parse_device_md(md_content):
     return main_title, '\n'.join(html_parts)
 
 
+def find_latest_api(lines, section_start_idx, section_end_idx):
+    """在指定范围内找出 API 数字最大的版本"""
+    max_api = -1
+    max_api_line_idx = -1
+
+    for i in range(section_start_idx, section_end_idx):
+        line = lines[i].strip()
+        if line.startswith('|') and '|-----' not in line:
+            cells = [c.strip() for c in line.split('|')]
+            cells = [c for c in cells if c]
+            if len(cells) >= 4 and cells[0] not in ['API', '']:
+                # 提取 API 数字
+                api_cell = cells[0]
+                link_match = re.match(r'\[(\d+)\]', api_cell)
+                if link_match:
+                    api_num = int(link_match.group(1))
+                else:
+                    api_match = re.match(r'(\d+)', api_cell)
+                    if api_match:
+                        api_num = int(api_match.group(1))
+                    else:
+                        continue
+                if api_num > max_api:
+                    max_api = api_num
+                    max_api_line_idx = i
+
+    return max_api, max_api_line_idx
+
+
 def md_to_html(md_content, device_content=None):
     """将Markdown内容转换为HTML"""
     lines = md_content.split('\n')
@@ -89,8 +118,26 @@ def md_to_html(md_content, device_content=None):
     # HTML 样式模板
     html_parts = get_html_template()
 
+    # 先扫描找出单框架部分的最大 API
+    single_start = -1
+    single_end = -1
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+        if stripped == '## 单框架':
+            single_start = i
+        elif single_start >= 0 and stripped.startswith('## '):
+            single_end = i
+            break
+    if single_start >= 0 and single_end < 0:
+        single_end = len(lines)
+
+    latest_api, latest_api_line_idx = -1, -1
+    if single_start >= 0 and single_end > single_start:
+        latest_api, latest_api_line_idx = find_latest_api(lines, single_start, single_end)
+
     in_table = False
     current_section = ''
+    current_api = None  # 当前行的 API 数字
     source_links = []  # 收集数据来源链接
 
     for line in lines:
@@ -147,6 +194,19 @@ def md_to_html(md_content, device_content=None):
             else:
                 row_parts = ['<tr>']
 
+            # 提取当前行的 API 数字（用于判断是否是最新版本）
+            if not is_header and current_section == '单框架' and len(cells) > 0:
+                api_cell = cells[0]
+                link_match = re.match(r'\[(\d+)\]', api_cell)
+                if link_match:
+                    current_api = int(link_match.group(1))
+                else:
+                    api_match = re.match(r'(\d+)', api_cell)
+                    if api_match:
+                        current_api = int(api_match.group(1))
+                    else:
+                        current_api = None
+
             for i, cell in enumerate(cells):
                 cell_processed = cell.replace('🔸', '<span class="beta">PREVIEW</span>')
                 cell_processed = cell_processed.replace('🔹', '<span class="stable">LATEST</span>')
@@ -186,11 +246,14 @@ def md_to_html(md_content, device_content=None):
                     if th_i18n_key:
                         cell_processed = f'<span data-i18n="{th_i18n_key}">{cell}</span>'
 
-                # 版本名称标签处理
+                # 版本名称标签处理（自动给最新 API 添加 NEW 标签）
                 if i == 1 and not is_header and current_section not in ['版本类型说明']:
                     version_name = cell
                     note_col = cells[-1] if cells else ''
                     has_milestone = bool(re.search(r'\*\*[^*]+\*\*', note_col))
+
+                    # 判断是否是最新版本
+                    is_latest = (current_section == '单框架' and current_api is not None and current_api == latest_api)
 
                     version_match = re.match(r'^HarmonyOS\s+\d+(?:\.(\d+|x|X))*(?:/\w+)?', version_name)
                     next_match = re.match(r'^NEXT\s+', version_name)
@@ -206,6 +269,10 @@ def md_to_html(md_content, device_content=None):
                         pure_version = version_match.group()
                         suffix = version_name[len(pure_version):].strip()
 
+                        # 过滤掉手动添加的 "New" 或 "NEW"（改为自动添加）
+                        if suffix.upper() in ['NEW', 'NEW']:
+                            suffix = ''
+
                         if suffix:
                             main_suffix, paren_tags = extract_paren_tags(suffix)
                             tag_parts = []
@@ -213,9 +280,14 @@ def md_to_html(md_content, device_content=None):
                                 tag_parts.append(f' <sup class="beta">{main_suffix.upper()}</sup>')
                             for pt in paren_tags:
                                 tag_parts.append(f' <sup class="paren">{pt.upper()}</sup>')
+                            # 自动添加 NEW 标签
+                            if is_latest:
+                                tag_parts.append(f' <sup class="beta">NEW</sup>')
                             cell_processed = f'<b>{pure_version}</b>{"".join(tag_parts)}{milestone_tag}'
                         else:
-                            cell_processed = f'<b>{pure_version}</b>{milestone_tag}'
+                            # 无后缀时，仅添加 NEW 标签（如果是最新版本）
+                            new_tag = f' <sup class="beta">NEW</sup>' if is_latest else ''
+                            cell_processed = f'<b>{pure_version}</b>{new_tag}{milestone_tag}'
                     elif next_match:
                         suffix = version_name[5:].strip()
                         main_suffix, paren_tags = extract_paren_tags(suffix)

@@ -1,0 +1,85 @@
+name: Update HarmonyOS Data
+
+on:
+  schedule:
+    # 每周一、周四北京时间 10:00 运行 (UTC 02:00)
+    - cron: '0 2 * * 1,4'
+  workflow_dispatch:  # 允许手动触发
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 获取完整历史以便比较
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          playwright install chromium --with-deps
+
+      - name: Fetch latest data
+        id: fetch
+        run: |
+          python3 main.py
+
+          # 检查是否有变化
+          if git diff --quiet hoapi.md hodevice.md index.html; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "No changes detected"
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "Changes detected:"
+            git diff --stat hoapi.md hodevice.md index.html
+          fi
+
+      - name: Commit and push changes
+        if: steps.fetch.outputs.changed == 'true'
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+
+          git add hoapi.md hodevice.md index.html
+
+          # 生成提交信息
+          API_CHANGES=$(git diff --stat hoapi.md | grep -c "|" || echo "0")
+          DEVICE_CHANGES=$(git diff --stat hodevice.md | grep -c "|" || echo "0")
+
+          if [ "$API_CHANGES" -gt 0 ]; then
+            COMMIT_MSG="feat: update HarmonyOS API levels and usage rates"
+          elif [ "$DEVICE_CHANGES" -gt 0 ]; then
+            COMMIT_MSG="feat: update HarmonyOS device support list"
+          else
+            COMMIT_MSG="feat: update HarmonyOS data"
+          fi
+
+          git commit -m "$COMMIT_MSG
+
+          Auto-updated by GitHub Actions bot.
+
+          Co-Authored-By: github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
+
+          git push
+
+      - name: Create summary
+        if: steps.fetch.outputs.changed == 'true'
+        run: |
+          echo "## Update Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### API Levels Changes" >> $GITHUB_STEP_SUMMARY
+          git diff hoapi.md >> $GITHUB_STEP_SUMMARY || echo "No API changes" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Device Support Changes" >> $GITHUB_STEP_SUMMARY
+          git diff hodevice.md >> $GITHUB_STEP_SUMMARY || echo "No device changes" >> $GITHUB_STEP_SUMMARY
