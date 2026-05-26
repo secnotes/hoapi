@@ -2,20 +2,21 @@
 
 | API | 对应系统版本 | 发布时间 | 使用率 | 备注 |
 |-----|-------------|---------|--------|------|
-| [23](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-610) | HarmonyOS 6.1.0 | 2026-04-20 | 12.26% | 开发能力得到进一步增强 |
-| [22](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-602) | HarmonyOS 6.0.2 | 2026-01-21 | 84.38% | **最新稳定版，移除"NEXT"后缀，统一全设备框架** |
-| [21](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-601) | HarmonyOS 6.0.1 | 2025-11-20 | 1.37% | 基于 API 21，无行为变更，稳定性增强 |
-| [20](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-600) | HarmonyOS 6.0.0 | 2025-09-25 | 0.25% | 新增"碰一碰"连接、企业空间 Kit、屏幕时间管理、AI 照片编辑工具 |
-| [19](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-511-beta1) | HarmonyOS 5.1.1 | 2025-06-30 | 0.68% | 持续支持中，新增相机与 AI 功能 |
-| [18](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-510) | HarmonyOS 5.1.0 | 2025-06-11 | 0.16% | 新增 Ability Kit、Account Kit、App Linking 能力 |
-| [17](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-505-release) | HarmonyOS 5.0.5 | 2025-05-14 | 0.75% | NEXT 迭代版本，增强分布式能力 |
+| [24](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-611) | HarmonyOS 6.1.1 | 2026-05-26 | 0.08% | 开发能力得到进一步增强 |
+| [23](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-610) | HarmonyOS 6.1.0 | 2026-04-20 | 84.94% | 开发能力得到进一步增强 |
+| [22](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-602) | HarmonyOS 6.0.2 | 2026-01-21 | 12.61% | **最新稳定版，移除"NEXT"后缀，统一全设备框架** |
+| [21](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-601) | HarmonyOS 6.0.1 | 2025-11-20 | 0.95% | 基于 API 21，无行为变更，稳定性增强 |
+| [20](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-600) | HarmonyOS 6.0.0 | 2025-09-25 | 0.27% | 新增"碰一碰"连接、企业空间 Kit、屏幕时间管理、AI 照片编辑工具 |
+| [19](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-511-beta1) | HarmonyOS 5.1.1 | 2025-06-30 | 0.28% | 持续支持中，新增相机与 AI 功能 |
+| [18](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-510) | HarmonyOS 5.1.0 | 2025-06-11 | 0.13% | 新增 Ability Kit、Account Kit、App Linking 能力 |
+| [17](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-505-release) | HarmonyOS 5.0.5 | 2025-05-14 | 0.54% | NEXT 迭代版本，增强分布式能力 |
 | [16](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-504) | HarmonyOS 5.0.4 | 2025-03-29 | 0.01% | **HarmonyOS NEX 里程碑：纯单框架，完全移除 AOSP，基于 OpenHarmony L0-L2** |
 | [15](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-503) | HarmonyOS 5.0.3 | 2025-03-15 | - | Ability Kit 增强、UX 样式更新、开发工具变更 |
 | [14](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-502-release) | HarmonyOS 5.0.2 | 2025-01-27 | - | 键盘 avoidance 模式支持光标避让、多项优化与修复 |
-| [13](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-501) | HarmonyOS 5.0.1 | 2024-11-30 | - | 进一步提升 API 13 能力，稳定性改进 |
-| [12](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-500) | HarmonyOS 5.0.0 | 2024-10-22 | - | **NEXT Public Beta / Commercial：消费者公测及商用发布，正式命名为 HarmonyOS 5。纯鸿蒙里程碑。正式确立 ArkTS 声明式开发范式，彻底转向原生架构。** |
-| 12 | HarmonyOS 5/NEXT Lite (Wearable) | 2024-09-19 | - | 可穿戴设备专用，基于 LiteOS 内核的轻量版 |
-| 12 | NEXT Developer Beta 1 | 2024-06-21 | - | 首个公开开发者测试版，"全场景"智能系统 |
+| [13](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-501) | HarmonyOS 5.0.1 | 2024-11-30 | 0% | 进一步提升 API 13 能力，稳定性改进 |
+| [12](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-500) | HarmonyOS 5.0.0 | 2024-10-22 | 0% | **NEXT Public Beta / Commercial：消费者公测及商用发布，正式命名为 HarmonyOS 5。纯鸿蒙里程碑。正式确立 ArkTS 声明式开发范式，彻底转向原生架构。** |
+| 12 | HarmonyOS 5/NEXT Lite (Wearable) | 2024-09-19 | 0% | 可穿戴设备专用，基于 LiteOS 内核的轻量版 |
+| 12 | NEXT Developer Beta 1 | 2024-06-21 | 0% | 首个公开开发者测试版，"全场景"智能系统 |
 | 11 | NEXT Developer Preview 1 (Canary) | 2024-01-18 | - | 新增大量 ArkTS API，扩展分布式硬件支持 |
 | 10 | NEXT Developer Preview 1 | 2023-10-26 | - | 新增 PC/平板模式支持，基于 OpenHarmony 4.0 |
 | 9 | NEXT Developer Preview 1 (Internal) | 2023-08-04 | - | 内部开发者预览，基于 OpenHarmony 3.2 |
