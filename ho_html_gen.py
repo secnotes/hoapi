@@ -5,7 +5,21 @@ HarmonyOS API HTML 生成脚本
 同时整合设备支持清单 (hodevice.md)
 """
 
+import datetime
+import html
+import os
 import re
+
+
+def get_last_updated(*files):
+    """取数据文件最近修改时间（YYYY-MM-DD），用于页面显示「最近更新」"""
+    latest = 0
+    for f in files:
+        if os.path.exists(f):
+            latest = max(latest, os.path.getmtime(f))
+    if not latest:
+        return ''
+    return datetime.datetime.fromtimestamp(latest).strftime('%Y-%m-%d')
 
 
 def parse_device_md(md_content):
@@ -36,10 +50,9 @@ def parse_device_md(md_content):
             section_title = stripped[3:]
             html_parts.append(f'<h3 id="device-{section_title.lower()}">{section_title}</h3>')
             html_parts.append('<div class="table-responsive"><table>')
-            html_parts.append('<thead><tr><th>设备系列</th><th>设备型号</th><th>型号代码</th><th>支持版本</th></tr></thead><tbody>')
             in_table = True
             current_series = None
-            is_first_row = True  # 新表格开始，等待跳过表头行
+            is_first_row = True  # 新表格开始，下一行为表头
 
         # 处理表格行
         elif stripped.startswith('|') and in_table:
@@ -56,17 +69,19 @@ def parse_device_md(md_content):
             if not cells or all(set(c) <= set('-:|') for c in cells):
                 continue
 
-            # 跳过MD中的表头行（第一个数据行且包含"设备系列"等标题）
-            if is_first_row and cells[0] == '设备系列':
+            # 第一行是 MD 表头，转成 HTML thead
+            if is_first_row:
+                th = ''.join(f'<th>{html.escape(c)}</th>' for c in cells)
+                html_parts.append(f'<thead><tr>{th}</tr></thead><tbody>')
                 is_first_row = False
                 continue
 
             # 判断是否有设备系列（非空的第一列）
             if len(cells) >= 4:
-                series = cells[0] if cells[0] else ''
-                model = cells[1]
-                code = cells[2]
-                version = cells[3]
+                series = html.escape(cells[0]) if cells[0] else ''
+                model = html.escape(cells[1])
+                code = html.escape(cells[2])
+                version = html.escape(cells[3])
 
                 if series:
                     current_series = series
@@ -111,12 +126,12 @@ def find_latest_api(lines, section_start_idx, section_end_idx):
     return max_api, max_api_line_idx
 
 
-def md_to_html(md_content, device_content=None):
+def md_to_html(md_content, device_content=None, last_updated=''):
     """将Markdown内容转换为HTML"""
     lines = md_content.split('\n')
 
     # HTML 样式模板
-    html_parts = get_html_template()
+    html_parts = get_html_template(last_updated)
 
     # 先扫描找出单框架部分的最大 API
     single_start = -1
@@ -208,6 +223,8 @@ def md_to_html(md_content, device_content=None):
                         current_api = None
 
             for i, cell in enumerate(cells):
+                # 转义原始文本，防止 <、>、& 被当作 HTML 解析；后续 markdown 标记（**、[link](url)、emoji）不受影响
+                cell = html.escape(cell)
                 cell_processed = cell.replace('🔸', '<span class="beta">PREVIEW</span>')
                 cell_processed = cell_processed.replace('🔹', '<span class="stable">LATEST</span>')
                 cell_processed = cell_processed.replace('✅', '<span class="stable">ACTIVE</span>')
@@ -357,8 +374,9 @@ def md_to_html(md_content, device_content=None):
     return '\n'.join(html_parts)
 
 
-def get_html_template():
+def get_html_template(last_updated=''):
     """返回 HTML 模板（样式和头部）"""
+    updated_tag = f'（最近更新：{last_updated}）' if last_updated else ''
     return [
         '<!DOCTYPE html>',
         '<html>',
@@ -436,8 +454,7 @@ def get_html_template():
         '.container { max-width: 960px; margin: 0 auto; }',
         '#site-title { font-size: 2.5rem; font-weight: 600; margin-bottom: 0.5rem; text-align: center; margin-top: 1rem; }',
         '#site-title a { color: var(--title-color); text-decoration: none; }',
-        'h2 { font-size: 1.5rem; font-weight: 600; margin-top: 2rem; margin-bottom: 1rem; padding: 0.75rem 1rem; background: linear-gradient(135deg, var(--title-gradient-1) 0%, var(--title-gradient-2) 100%); border-radius: 8px; }',
-        'h2 { font-size: 1.5rem; font-weight: 600; margin-top: 2rem; margin-bottom: 1rem; padding-bottom: 0.5rem; }',
+        'h2 { font-size: 1.5rem; font-weight: 600; margin-top: 2rem; margin-bottom: 1rem; padding: 0.75rem 1rem 0.5rem; background: linear-gradient(135deg, var(--title-gradient-1) 0%, var(--title-gradient-2) 100%); border-radius: 8px; }',
         'h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.75rem; }',
         'h4 { font-size: 1rem; font-weight: 600; margin-top: 1rem; margin-bottom: 0.5rem; }',
         '#intro { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1.5rem; padding: 0.75rem 1rem 0.75rem 1.25rem; line-height: 1.7; border-left: 3px solid var(--link-color); background: linear-gradient(90deg, rgba(0, 125, 255, 0.05), transparent); text-align: left; }',
@@ -517,7 +534,6 @@ def get_html_template():
         '    .container { padding: 0 1rem; }',
         '    #site-title { font-size: 1.75rem; margin-bottom: 0.75rem; margin-top: 0.5rem; }',
         '    h2 { font-size: 1.25rem; margin-top: 1.5rem; padding: 0.5rem 0.75rem; }',
-        '    h2 { font-size: 1.25rem; margin-top: 1.5rem; }',
         '    #intro { padding: 0.5rem 0.75rem; margin-bottom: 1rem; }',
         '    #theme-toggle { top: 0.5rem; right: 0.5rem; width: 36px; height: 36px; }',
         '    #theme-toggle svg { width: 18px; height: 18px; }',
@@ -539,7 +555,6 @@ def get_html_template():
         '    html { font-size: 13px; }',
         '    #site-title { font-size: 1.5rem; }',
         '    h2 { font-size: 1.1rem; padding: 0.4rem 0.5rem; }',
-        '    h2 { font-size: 1.1rem; }',
         '    th, td { padding: 0.4rem 0.5rem; font-size: 0.9rem; }',
         '    #lang-toggle { right: 2.5rem; }',
         '    #toc ul { flex-direction: column; gap: 0.25rem; }',
@@ -556,11 +571,11 @@ def get_html_template():
         '<button id="lang-toggle" title="切换语言">中</button>',
 
         # JavaScript
-        get_javascript(),
+        get_javascript(last_updated),
 
         '<div class="container">',
         '<h1 id="site-title"><a href="#" data-i18n="site-title">HarmonyOS API Levels</a></h1>',
-        '<p id="intro" data-i18n="intro">这是鸿蒙系统 API 和系统版本映射关系参考表，涵盖单框架与双框架两个技术路线。单框架代表纯鸿蒙架构，双框架则兼容 Android 应用生态。使用率数据来源于华为官方，定期更新。</p>',
+        f'<p id="intro" data-i18n="intro">这是鸿蒙系统 API 和系统版本映射关系参考表，涵盖单框架与双框架两个技术路线。单框架代表纯鸿蒙架构，双框架则兼容 Android 应用生态。使用率数据来源于华为官方，定期更新。{updated_tag}</p>',
         # 目录
         '\n'.join(get_toc_html()),
         '</div>',
@@ -583,14 +598,15 @@ def get_toc_html():
         '<li><a href="#device-pc" class="toc-sub" data-i18n="device-pc">PC</a></li>',
         '<li><a href="#device-穿戴" class="toc-sub" data-i18n="device-wearable">穿戴</a></li>',
         '<li><a href="#device-iot" class="toc-sub" data-i18n="device-iot">IoT</a></li>',
+        '<li><a href="#device-预览版支持" class="toc-sub" data-i18n="device-preview">预览版支持</a></li>',
         '</ul>',
         '</div>',
     ]
 
 
-def get_javascript():
+def get_javascript(last_updated=''):
     """返回 JavaScript 代码"""
-    return '''<script>
+    js = '''<script>
 (function() {
     const savedTheme = localStorage.getItem("theme");
     if (savedTheme) {
@@ -631,6 +647,7 @@ def get_javascript():
         "device-pc": { zh: "PC", en: "PC" },
         "device-wearable": { zh: "穿戴", en: "Wearable" },
         "device-iot": { zh: "IoT", en: "IoT" },
+        "device-preview": { zh: "预览版支持", en: "Preview (Beta)" },
         "device-intro": { zh: "支持 HarmonyOS 的设备型号列表，数据来源于华为开发者网站。", en: "List of devices supporting HarmonyOS, sourced from Huawei's developer website." },
         "th-api": { zh: "API", en: "API" },
         "th-version": { zh: "对应系统版本", en: "System Version" },
@@ -668,6 +685,10 @@ def get_javascript():
     });
 })();
 </script>'''
+    if last_updated:
+        js = js.replace('定期更新。', f'定期更新。（最近更新：{last_updated}）', 1)
+        js = js.replace('updated periodically.', f'updated periodically. (Last updated: {last_updated})', 1)
+    return js
 
 
 def get_html_footer():
@@ -709,7 +730,8 @@ def generate_html(md_file='hoapi.md', device_file='hodevice.md', html_file='inde
         except FileNotFoundError:
             print(f"文件 {device_file} 不存在，跳过设备支持清单")
 
-        html_content = md_to_html(md_content, device_content)
+        last_updated = get_last_updated(md_file, device_file)
+        html_content = md_to_html(md_content, device_content, last_updated)
 
         with open(html_file, 'w', encoding='utf-8') as f:
             f.write(html_content)

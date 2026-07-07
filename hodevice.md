@@ -1,7 +1,7 @@
 # HarmonyOS 支持设备型号清单
 
 > 数据来源: https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/support-device
-> 更新时间: 2026-05-26
+> 更新时间: 2026-07-07
 
 ## 手机
 
@@ -11,11 +11,12 @@
 | | Mate 60 Pro | ALN-AL00, ALN-AL80 | 6.1.0 |
 | | Mate 60 Pro+ | ALN-AL10 | 6.1.0 |
 | | Mate 60 RS 非凡大师 | ALN-AL10 | 6.1.0 |
+| Mate 70 Air | Mate 70 Air | SUP-AL90, SUP-AL90a | 6.1.1 |
 | Mate 70系列 | Mate 70 | CLS-AL00, CLS-AL30 | 6.1.0 |
 | | Mate 70 Air | SUP-AL90, SUP-AL90a | 6.1.0 |
 | | Mate 70 Pro | PLR-AL00, PLR-AL30 | 6.1.0 |
 | | Mate 70 Pro 优享版 | PLR-AL50 | 6.1.0 |
-| | Mate 70 Pro+ | PLR-AL10 | 6.1.0 |
+| | Mate 70 Pro+ | PLA-AL10 | 6.1.0 |
 | | Mate 70 RS 非凡大师 | PLU-AL10 | 6.1.0 |
 | Mate 80系列 | Mate 80 | VYG-AL00, VYG-AL30 | 6.1.1 |
 | | Mate 80 Pro | SGT-AL00, SGT-AL50 | 6.1.1 |
@@ -115,6 +116,8 @@
 | | HUAWEI WATCH ULTIMATE DESIGN 非凡大师 紫金款 | - | 6.1.0 |
 | | HUAWEI WATCH Ultimate 2 | - | 6.0.1 |
 | | HUAWEI WATCH Ultimate 2 非凡探索 | - | 6.1.0 |
+| | 超新星手表 X1 | - | 6.1.1 |
+| | 超新星手表 X1 Pro | - | 6.1.1 |
 
 ## IoT
 
@@ -127,3 +130,17 @@
 | | MateTV Pro 75英寸 | HD75EDIJ | 5.1.1 |
 | | MateTV Pro 85英寸 | HD8XEDIJ | 5.1.1 |
 | | MateTV Pro 98英寸 | HD98EDIJ | 5.1.1 |
+
+## 预览版支持
+
+> 以下设备已支持 HarmonyOS 预览版（Beta），数据来源于华为开发者网站，仅供开发者参考。
+
+| 设备类型 | 设备型号 | 型号代码 | 预览版本 |
+|---------|---------|---------|---------|
+| 手机 | Mate 80 Pro | SGT-AL00, SGT-AL50 | 26.0.0 Beta1 |
+| 手机 | Mate X7 | DEL-AL10 | 26.0.0 Beta1 |
+| 手机 | Mate XTs 非凡大师 | GRL-AL20 | 26.0.0 Beta1 |
+| 手机 | Pura 90 Pro Max | SCA-AL00 | 26.0.0 Beta1 |
+| 手机 | Pura X | VDE-AL00 | 26.0.0 Beta1 |
+| 手机 | Pura X 典藏版 | VDE-AL10 | 26.0.0 Beta1 |
+| 手机 | nova 15 pro | KLE-AL00U | 26.0.0 Beta1 |

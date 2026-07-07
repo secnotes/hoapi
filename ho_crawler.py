@@ -15,17 +15,20 @@ from playwright.sync_api import sync_playwright
 # 注意: 请定期更新此数据
 MANUAL_VERSION_DATA = {
     # 单框架 (HarmonyOS NEXT) 版本使用率
-    '22': '12.5',  # HarmonyOS 6.0.2
-    '21': '8.2',   # HarmonyOS 6.0.1
-    '20': '15.3',  # HarmonyOS 6.0.0
-    '19': '22.1',  # HarmonyOS 5.1.1
-    '18': '18.7',  # HarmonyOS 5.1.0
-    '17': '3.2',   # HarmonyOS 5.0.5
-    '16': '5.8',   # HarmonyOS 5.0.4
-    '15': '2.1',   # HarmonyOS 5.0.3
-    '14': '1.5',   # HarmonyOS 5.0.2
-    '13': '1.2',   # HarmonyOS 5.0.1
-    '12': '3.3',   # HarmonyOS 5.0.0
+    # 与 hoapi.md 保持同步；在线抓取失败时作为回退数据
+    '24': '0.08',   # HarmonyOS 6.1.1
+    '23': '84.94',  # HarmonyOS 6.1.0
+    '22': '12.61',  # HarmonyOS 6.0.2
+    '21': '0.95',   # HarmonyOS 6.0.1
+    '20': '0.27',   # HarmonyOS 6.0.0
+    '19': '0.28',   # HarmonyOS 5.1.1
+    '18': '0.13',   # HarmonyOS 5.1.0
+    '17': '0.54',   # HarmonyOS 5.0.5
+    '16': '0.01',   # HarmonyOS 5.0.4
+    '15': '0',      # HarmonyOS 5.0.3
+    '14': '0',      # HarmonyOS 5.0.2
+    '13': '0',      # HarmonyOS 5.0.1
+    '12': '0',      # HarmonyOS 5.0.0
 }
 
 
@@ -36,7 +39,11 @@ def fetch_version_percentage_online():
     print(f"尝试访问: {url}")
     try:
         with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
+            try:
+                browser = p.chromium.launch(headless=True)
+            except Exception:
+                # Playwright 自带 Chromium 未安装时，回退到系统 Chrome
+                browser = p.chromium.launch(channel='chrome', headless=True)
             page = browser.new_page()
 
             page.goto(url, wait_until='domcontentloaded', timeout=30000)

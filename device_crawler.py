@@ -17,7 +17,11 @@ def fetch_device_data():
 
     print("正在加载页面...")
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
+        try:
+            browser = p.chromium.launch(headless=True)
+        except Exception:
+            # Playwright 自带 Chromium 未安装时，回退到系统 Chrome
+            browser = p.chromium.launch(channel='chrome', headless=True)
         page = browser.new_page()
 
         # 使用 domcontentloaded 而不是 networkidle，更快加载
@@ -138,12 +142,19 @@ def parse_tables(html_content):
             continue
 
         current_version = version_match.group(1)
+        # 识别预览版后缀（Beta1/Preview/Canary），用于去重时稳定版优先与显示标注
+        label_match = re.search(r'(Beta\d*|Preview\d*|Canary)', version_text, re.IGNORECASE)
+        current_label = label_match.group(1) if label_match else ''
+        current_is_preview = bool(current_label)
 
         # 解析表格
         devices = parse_table(table)
         if devices:
+            for d in devices:
+                d['is_preview'] = current_is_preview
+                d['version_label'] = current_label
             data[device_type][current_version].extend(devices)
-            print(f"  {current_version} -> {device_type}: {len(devices)} 条")
+            print(f"  {current_version}{(' ' + current_label) if current_label else ''} -> {device_type}: {len(devices)} 条")
 
     # 处理文字形式的设备列表（Wearable, Lite Wearable）
     text_device_types = ['Wearable', 'Lite Wearable']
@@ -165,8 +176,14 @@ def parse_tables(html_content):
                     # 解析文字设备列表
                     devices = parse_text_devices(heading)
                     if devices:
+                        label_match = re.search(r'(Beta\d*|Preview\d*|Canary)', version_text, re.IGNORECASE)
+                        cur_label = label_match.group(1) if label_match else ''
+                        cur_preview = bool(cur_label)
+                        for d in devices:
+                            d['is_preview'] = cur_preview
+                            d['version_label'] = cur_label
                         data[device_type][current_version].extend(devices)
-                        print(f"  {current_version} -> {device_type}(文字): {len(devices)} 条")
+                        print(f"  {current_version}{(' ' + cur_label) if cur_label else ''} -> {device_type}(文字): {len(devices)} 条")
 
     return data
 
@@ -262,6 +279,9 @@ def generate_markdown(data, output_file='hodevice.md'):
     # 设备类型顺序
     type_order = ['手机', '平板', 'PC', '穿戴', 'IoT']
 
+    # 收集预览版（Beta）设备，单独成表；主表只保留稳定版
+    preview_rows = []
+
     for device_type in type_order:
         if device_type not in data:
             continue
@@ -276,26 +296,27 @@ def generate_markdown(data, output_file='hodevice.md'):
         # 按版本排序（从高到低）
         versions = sorted(data[device_type].keys(), key=lambda v: [int(x) for x in v.split('.')], reverse=True)
 
-        # 收集所有设备，按系列分组
+        # 收集稳定版设备；预览版设备转入 preview_rows
         all_devices = []
         for version in versions:
             for device in data[device_type][version]:
                 device['version'] = version
                 # 标准化设备系列名称
                 device['series'] = normalize_series_name(device['series'])
-                all_devices.append(device)
+                if device.get('is_preview'):
+                    preview_rows.append((device_type, device))
+                else:
+                    all_devices.append(device)
 
-        # 按系列和版本排序
-        # 同一设备系列，只保留最新版本
+        # 同一设备系列+型号，只保留最高稳定版本
         series_version_map = defaultdict(dict)
         for device in all_devices:
             series = device['series']
             model = device['model']
             version = device['version']
-
-            # 如果同一型号出现在多个版本中，只保留最高版本
-            if model not in series_version_map[series] or \
-               [int(x) for x in version.split('.')] > [int(x) for x in series_version_map[series][model]['version'].split('.')]:
+            existing = series_version_map[series].get(model)
+            if existing is None or \
+               [int(x) for x in version.split('.')] > [int(x) for x in existing['version'].split('.')]:
                 series_version_map[series][model] = device
 
         # 输出表格
@@ -305,7 +326,6 @@ def generate_markdown(data, output_file='hodevice.md'):
 
             for model_name in sorted(models.keys()):
                 device = models[model_name]
-
                 if first_model:
                     # 第一行显示设备系列
                     lines.append(f'| {series} | {device["model"]} | {device["code"]} | {device["version"]} |')
@@ -314,6 +334,27 @@ def generate_markdown(data, output_file='hodevice.md'):
                     # 后续行不重复设备系列
                     lines.append(f'| | {device["model"]} | {device["code"]} | {device["version"]} |')
 
+        lines.append('')
+
+    # 预览版（Beta）设备单独成表
+    if preview_rows:
+        lines.append('## 预览版支持')
+        lines.append('')
+        lines.append('> 以下设备已支持 HarmonyOS 预览版（Beta），数据来源于华为开发者网站，仅供开发者参考。')
+        lines.append('')
+        lines.append('| 设备类型 | 设备型号 | 型号代码 | 预览版本 |')
+        lines.append('|---------|---------|---------|---------|')
+        # 同设备类型+型号只保留一条（版本已按降序收集，首条即最高）
+        seen = set()
+        for device_type, device in sorted(preview_rows, key=lambda x: (type_order.index(x[0]) if x[0] in type_order else 99, x[1]['model'])):
+            key = (device_type, device['model'])
+            if key in seen:
+                continue
+            seen.add(key)
+            ver = device['version']
+            if device.get('version_label'):
+                ver = f'{ver} {device["version_label"]}'
+            lines.append(f'| {device_type} | {device["model"]} | {device["code"]} | {ver} |')
         lines.append('')
 
     # 写入文件
