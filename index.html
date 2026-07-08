@@ -160,114 +160,33 @@ table a:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
-<button id="theme-toggle" title="切换主题">
-<svg id="moon-icon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="2" fill="none"/></svg>
-<svg id="sun-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2" fill="none"/><line x1="12" y1="1" x2="12" y2="3" stroke="currentColor" stroke-width="2"/><line x1="12" y1="21" x2="12" y2="23" stroke="currentColor" stroke-width="2"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke="currentColor" stroke-width="2"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" stroke="currentColor" stroke-width="2"/><line x1="1" y1="12" x2="3" y2="12" stroke="currentColor" stroke-width="2"/><line x1="21" y1="12" x2="23" y2="12" stroke="currentColor" stroke-width="2"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke="currentColor" stroke-width="2"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke="currentColor" stroke-width="2"/></svg>
-</button>
+<button id="theme-toggle" title="切换主题"><svg id="moon-icon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="2" fill="none"/></svg><svg id="sun-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2" fill="none"/><line x1="12" y1="1" x2="12" y2="3" stroke="currentColor" stroke-width="2"/><line x1="12" y1="21" x2="12" y2="23" stroke="currentColor" stroke-width="2"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke="currentColor" stroke-width="2"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" stroke="currentColor" stroke-width="2"/><line x1="1" y1="12" x2="3" y2="12" stroke="currentColor" stroke-width="2"/><line x1="21" y1="12" x2="23" y2="12" stroke="currentColor" stroke-width="2"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke="currentColor" stroke-width="2"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke="currentColor" stroke-width="2"/></svg></button>
 <button id="lang-toggle" title="切换语言">中</button>
-<script>
-(function() {
-    const savedTheme = localStorage.getItem("theme");
-    if (savedTheme) {
-        document.documentElement.setAttribute("data-theme", savedTheme);
-    } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
-        document.documentElement.setAttribute("data-theme", "dark");
-    } else {
-        document.documentElement.setAttribute("data-theme", "light");
-    }
-
-    const toggleTheme = () => {
-        const currentTheme = document.documentElement.getAttribute("data-theme");
-        const newTheme = currentTheme === "dark" ? "light" : "dark";
-        document.documentElement.setAttribute("data-theme", newTheme);
-        localStorage.setItem("theme", newTheme);
-    };
-
-    document.getElementById("theme-toggle").addEventListener("click", toggleTheme);
-
-    if (window.matchMedia) {
-        window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
-            if (!localStorage.getItem("theme")) {
-                document.documentElement.setAttribute("data-theme", e.matches ? "dark" : "light");
-            }
-        });
-    }
-
-    const translations = {
-        "site-title": { zh: "HarmonyOS API Levels", en: "HarmonyOS API Levels" },
-        "intro": { zh: "这是鸿蒙系统 API 和系统版本映射关系参考表，涵盖单框架与双框架两个技术路线。单框架代表纯鸿蒙架构，双框架则兼容 Android 应用生态。使用率数据来源于华为官方，定期更新。（最近更新：2026-07-07）", en: "This reference table documents the mapping between HarmonyOS API levels and system versions across both single-framework and dual-framework architectures. The single-framework represents pure HarmonyOS, while dual-framework maintains Android compatibility. Usage statistics are sourced from Huawei's official developer documentation and updated periodically. (Last updated: 2026-07-07)" },
-        "toc-title": { zh: "目录", en: "Contents" },
-        "section-single": { zh: "单框架", en: "Single Framework" },
-        "section-dual": { zh: "双框架", en: "Dual Framework" },
-        "section-notes": { zh: "版本类型说明", en: "Version Types" },
-        "section-device": { zh: "设备支持清单", en: "Device Support List" },
-        "device-phone": { zh: "手机", en: "Phone" },
-        "device-tablet": { zh: "平板", en: "Tablet" },
-        "device-pc": { zh: "PC", en: "PC" },
-        "device-wearable": { zh: "穿戴", en: "Wearable" },
-        "device-iot": { zh: "IoT", en: "IoT" },
-        "device-preview": { zh: "预览版支持", en: "Preview (Beta)" },
-        "device-intro": { zh: "支持 HarmonyOS 的设备型号列表，数据来源于华为开发者网站。", en: "List of devices supporting HarmonyOS, sourced from Huawei's developer website." },
-        "th-api": { zh: "API", en: "API" },
-        "th-version": { zh: "对应系统版本", en: "System Version" },
-        "th-date": { zh: "发布时间", en: "Release Date" },
-        "th-usage": { zh: "使用率", en: "Usage" },
-        "th-android": { zh: "支持的 Android 版本", en: "Android Version" },
-        "th-note": { zh: "备注", en: "Notes" },
-        "th-type": { zh: "类型", en: "Type" },
-        "th-desc": { zh: "说明", en: "Description" },
-        "th-purpose": { zh: "作用", en: "Purpose" },
-    };
-
-    const savedLang = localStorage.getItem("lang") || "zh";
-    document.documentElement.setAttribute("data-lang", savedLang);
-    document.getElementById("lang-toggle").textContent = savedLang === "zh" ? "EN" : "中";
-
-    const applyLanguage = (lang) => {
-        document.querySelectorAll("[data-i18n]").forEach(el => {
-            const key = el.getAttribute("data-i18n");
-            if (translations[key] && translations[key][lang]) {
-                el.textContent = translations[key][lang];
-            }
-        });
-        document.getElementById("lang-toggle").textContent = lang === "zh" ? "EN" : "中";
-    };
-
-    applyLanguage(savedLang);
-
-    document.getElementById("lang-toggle").addEventListener("click", () => {
-        const currentLang = document.documentElement.getAttribute("data-lang");
-        const newLang = currentLang === "zh" ? "en" : "zh";
-        document.documentElement.setAttribute("data-lang", newLang);
-        localStorage.setItem("lang", newLang);
-        applyLanguage(newLang);
-    });
-})();
-</script>
+<div id="page-zh">
 <div class="container">
-<h1 id="site-title"><a href="#" data-i18n="site-title">HarmonyOS API Levels</a></h1>
-<p id="intro" data-i18n="intro">这是鸿蒙系统 API 和系统版本映射关系参考表，涵盖单框架与双框架两个技术路线。单框架代表纯鸿蒙架构，双框架则兼容 Android 应用生态。使用率数据来源于华为官方，定期更新。（最近更新：2026-07-07）</p>
+<h1 id="site-title"><a href="#">HarmonyOS API Levels</a></h1>
+<p id="intro">这是鸿蒙系统 API 和系统版本映射关系参考表，涵盖单框架与双框架两个技术路线。单框架代表纯鸿蒙架构，双框架则兼容 Android 应用生态。使用率数据来源于华为官方，定期更新。（最近更新：2026-07-07）</p>
 <div id="toc">
-<h3 data-i18n="toc-title">目录</h3>
+<h3>目录</h3>
 <ul>
-<li><a href="#单框架" class="toc-section" data-i18n="section-single">单框架</a></li>
-<li><a href="#双框架" class="toc-section" data-i18n="section-dual">双框架</a></li>
-<li><a href="#版本类型说明" class="toc-section" data-i18n="section-notes">版本类型说明</a></li>
-<li><a href="#device-手机" class="toc-sub" data-i18n="device-phone">手机</a></li>
-<li><a href="#device-平板" class="toc-sub" data-i18n="device-tablet">平板</a></li>
-<li><a href="#device-pc" class="toc-sub" data-i18n="device-pc">PC</a></li>
-<li><a href="#device-穿戴" class="toc-sub" data-i18n="device-wearable">穿戴</a></li>
-<li><a href="#device-iot" class="toc-sub" data-i18n="device-iot">IoT</a></li>
-<li><a href="#device-预览版支持" class="toc-sub" data-i18n="device-preview">预览版支持</a></li>
+<li><a href="#单框架" class="toc-section">单框架</a></li>
+<li><a href="#双框架" class="toc-section">双框架</a></li>
+<li><a href="#版本类型说明" class="toc-section">版本类型说明</a></li>
+<li><a href="#device-手机" class="toc-sub">手机</a></li>
+<li><a href="#device-平板" class="toc-sub">平板</a></li>
+<li><a href="#device-pc" class="toc-sub">PC</a></li>
+<li><a href="#device-穿戴" class="toc-sub">穿戴</a></li>
+<li><a href="#device-iot" class="toc-sub">IoT</a></li>
+<li><a href="#device-预览版支持" class="toc-sub">预览版支持</a></li>
 </ul>
 </div>
 </div>
 <div class="container">
 <div id="page-content">
-<h2 id="单框架" data-i18n="section-single">单框架</h2>
+<h2 id="单框架">单框架</h2>
 <div class="table-responsive">
 <table>
-<thead><tr><th><span data-i18n="th-api">API</span></th><th><span data-i18n="th-version">对应系统版本</span></th><th><span data-i18n="th-date">发布时间</span></th><th><span data-i18n="th-usage">使用率</span></th><th><span data-i18n="th-note">备注</span></th></tr></thead><tbody>
+<thead><tr><th>API</th><th>对应系统版本</th><th>发布时间</th><th>使用率</th><th>备注</th></tr></thead><tbody>
 <tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-611" target="_blank" rel="noopener">24</a></td><td><b>HarmonyOS 6.1.1</b> <sup class="beta">NEW</sup></td><td>2026-05-26</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.08%, var(--usage-bar-end) 0.08%);">0.08%</td><td>开发者工具链升级、AI 影像增强、跨设备协同优化及安全能力深化，普通端侧体验以相机智能追踪、AI 字幕定制、卡证识别扩展及系统流畅度提升为主</td></tr>
 <tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-610" target="_blank" rel="noopener">23</a></td><td><b>HarmonyOS 6.1.0</b></td><td>2026-04-20</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 84.94%, var(--usage-bar-end) 84.94%);">84.94%</td><td>悬浮导航、沉浸光感</td></tr>
 <tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-602" target="_blank" rel="noopener">22</a></td><td><b>HarmonyOS 6.0.2</b></td><td>2026-01-21</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 12.61%, var(--usage-bar-end) 12.61%);">12.61%</td><td>开发者工具链与底层能力增强，新增超 50 项特性，聚焦 ArkUI 组件灵活性、跨端协同、安全隐私及算法加速，普通端侧主要为 Bug 修复</td></tr>
@@ -289,10 +208,10 @@ table a:hover { text-decoration: underline; }
 </tbody>
 </table>
 </div>
-<h2 id="双框架" data-i18n="section-dual">双框架</h2>
+<h2 id="双框架">双框架</h2>
 <div class="table-responsive">
 <table>
-<thead><tr><th><span data-i18n="th-api">API</span></th><th><span data-i18n="th-version">对应系统版本</span></th><th><span data-i18n="th-date">发布时间</span></th><th><span data-i18n="th-android">支持的 Android 版本</span></th><th><span data-i18n="th-note">备注</span></th></tr></thead><tbody>
+<thead><tr><th>API</th><th>对应系统版本</th><th>发布时间</th><th>支持的 Android 版本</th><th>备注</th></tr></thead><tbody>
 <tr><td>-</td><td><b>HarmonyOS 4.5</b> <sup class="paren">TV</sup></td><td>2024-09-24</td><td>Android 12</td><td>仅用于 Vision TV 系列智能电视</td></tr>
 <tr><td>-</td><td><b>HarmonyOS 4.3.1</b></td><td>2025-07-10</td><td>Android 12</td><td>持续支持中，最后的双框架 LTS 版本（EMUI 15 同源）</td></tr>
 <tr><td>-</td><td><b>HarmonyOS 4.3.0</b></td><td>2024-11-26</td><td>Android 12</td><td>Mate 70系列及Mate X6非先锋版SKU于2024年11月26日在中国上市</td></tr>
@@ -316,10 +235,10 @@ table a:hover { text-decoration: underline; }
 </tbody>
 </table>
 </div>
-<h2 id="版本类型说明" data-i18n="section-notes">版本类型说明</h2>
+<h2 id="版本类型说明">版本类型说明</h2>
 <div class="table-responsive">
 <table>
-<thead><tr><th><span data-i18n="th-type">类型</span></th><th><span data-i18n="th-desc">说明</span></th><th><span data-i18n="th-purpose">作用</span></th></tr></thead><tbody>
+<thead><tr><th>类型</th><th>说明</th><th>作用</th></tr></thead><tbody>
 <tr><td>Canary</td><td>早期体验版本，特性功能待稳定</td><td>可反馈问题，华为全力解决</td></tr>
 <tr><td>Beta</td><td>公开发布的Beta版本，特性功能待稳定</td><td>可反馈使用体验，改进产品</td></tr>
 <tr><td>Release</td><td>正式发布版本，承诺质量，特性功能稳定</td><td>可基于新功能完成开发，发布应用</td></tr>
@@ -484,5 +403,301 @@ Inspired by <a href="https://apilevels.com/" target="_blank">Android API Levels<
 </p>
 </div>
 </div>
+</div>
+<div id="page-en" hidden>
+<div class="container">
+<h1 id="site-title"><a href="#">HarmonyOS API Levels</a></h1>
+<p id="intro">This is a reference table for the mapping between HarmonyOS system APIs and system versions, covering two technical routes: Single Framework and Dual Framework. Single Framework represents the pure HarmonyOS architecture, while Dual Framework is compatible with the Android application ecosystem. Usage rate data is sourced from Huawei official sources and updated regularly. (Last updated: 2026-07-07)</p>
+<div id="toc">
+<h3>Table of Contents</h3>
+<ul>
+<li><a href="#en-单框架" class="toc-section">Single Framework</a></li>
+<li><a href="#en-双框架" class="toc-section">Dual Framework</a></li>
+<li><a href="#en-版本类型说明" class="toc-section">Version Type Description</a></li>
+<li><a href="#en-device-手机" class="toc-sub">Phones</a></li>
+<li><a href="#en-device-平板" class="toc-sub">Tablets</a></li>
+<li><a href="#en-device-pc" class="toc-sub">PC</a></li>
+<li><a href="#en-device-穿戴" class="toc-sub">Wearables</a></li>
+<li><a href="#en-device-iot" class="toc-sub">IoT</a></li>
+<li><a href="#en-device-预览版支持" class="toc-sub">Preview Support</a></li>
+</ul>
+</div>
+</div>
+<div class="container">
+<div id="page-content">
+<h2 id="en-单框架">Single Framework</h2>
+<div class="table-responsive">
+<table>
+<thead><tr><th>API</th><th>Corresponding System Version</th><th>Release Date</th><th>Usage Rate</th><th>Remarks</th></tr></thead><tbody>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-611" target="_blank" rel="noopener">24</a></td><td><b>HarmonyOS 6.1.1</b> <sup class="beta">NEW</sup></td><td>2026-05-26</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.08%, var(--usage-bar-end) 0.08%);">0.08%</td><td>Developer toolchain upgrade, AI image enhancement, cross-device collaboration optimization, and security capability deepening. End-user experience focuses on camera smart tracking, AI subtitle customization, expanded card/ID recognition, and system smoothness improvements.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-610" target="_blank" rel="noopener">23</a></td><td><b>HarmonyOS 6.1.0</b></td><td>2026-04-20</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 84.94%, var(--usage-bar-end) 84.94%);">84.94%</td><td>Floating navigation, immersive light sensing.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-602" target="_blank" rel="noopener">22</a></td><td><b>HarmonyOS 6.0.2</b></td><td>2026-01-21</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 12.61%, var(--usage-bar-end) 12.61%);">12.61%</td><td>Developer toolchain and underlying capability enhancements, adding over 50 new features. Focuses on ArkUI component flexibility, cross-device collaboration, security & privacy, and algorithm acceleration. End-user experience primarily consists of bug fixes.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-601" target="_blank" rel="noopener">21</a></td><td><b>HarmonyOS 6.0.1</b></td><td>2025-11-20</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.95%, var(--usage-bar-end) 0.95%);">0.95%</td><td>ArkUI component enhancements, multi-instance support for background tasks, refined map/camera/voice services, and basic information exposure. Primarily for supplementing developer capabilities rather than major end-user feature updates.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-600" target="_blank" rel="noopener">20</a></td><td><b>HarmonyOS 6.0.0</b> <sup class="milestone">Milestone</sup></td><td>2025-09-25</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.27%, var(--usage-bar-end) 0.27%);">0.27%</td><td><strong>Full-stack self-developed Pure-blood architecture (NEXT suffix removed)</strong>, AI agent proactive services, spatial immersive interaction, and cross-ecosystem seamless connectivity.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-511-beta1" target="_blank" rel="noopener">19</a></td><td><b>HarmonyOS 5.1.1</b></td><td>2025-06-30</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.28%, var(--usage-bar-end) 0.28%);">0.28%</td><td>ArkUI interaction enhancements, map service upgrades, deepened performance analysis, and expanded multimodal capabilities. Primarily provides refined controls and underlying toolchain support for developers.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-510" target="_blank" rel="noopener">18</a></td><td><b>HarmonyOS 5.1.0</b> <sup class="milestone">Milestone</sup></td><td>2025-06-11</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.13%, var(--usage-bar-end) 0.13%);">0.13%</td><td><strong>First native support for smart wearables development</strong>, <strong>revolutionary upgrade to Live Window interaction</strong>, <strong>deep integration of AI capabilities</strong>, and <strong>enhancements to the underlying framework and ArkUI components</strong>.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-505-release" target="_blank" rel="noopener">17</a></td><td><b>HarmonyOS 5.0.5</b></td><td>2025-05-14</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.54%, var(--usage-bar-end) 0.54%);">0.54%</td><td>Fine-grained control of windowed scenarios, ArkUI interaction enhancements, and multimedia/security capability expansions.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-504" target="_blank" rel="noopener">16</a></td><td><b>HarmonyOS 5.0.4</b> <sup class="milestone">Milestone</sup></td><td>2025-03-29</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.01%, var(--usage-bar-end) 0.01%);">0.01%</td><td><strong>HarmonyOS NEXT Milestone: Pure single framework, complete removal of AOSP, based on OpenHarmony L0-L2.</strong></td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-503" target="_blank" rel="noopener">15</a></td><td><b>HarmonyOS 5.0.3</b></td><td>2025-03-15</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.0%, var(--usage-bar-end) 0.0%);">0.0%</td><td>Ability Kit enhancements, UX style updates, development tool changes.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-502-release" target="_blank" rel="noopener">14</a></td><td><b>HarmonyOS 5.0.2</b></td><td>2025-01-27</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.0%, var(--usage-bar-end) 0.0%);">0.0%</td><td>Keyboard avoidance mode supports cursor dodging, various optimizations and fixes.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-501" target="_blank" rel="noopener">13</a></td><td><b>HarmonyOS 5.0.1</b></td><td>2024-11-30</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.0%, var(--usage-bar-end) 0.0%);">0.0%</td><td>Stability enhancements and C API completion version. No disruptive end-user features added; primarily focuses on perfecting interface capabilities for developers and fixing platform behaviors.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-500" target="_blank" rel="noopener">12</a></td><td><b>HarmonyOS 5.0.0</b> <sup class="milestone">Milestone</sup></td><td>2024-10-22</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.0%, var(--usage-bar-end) 0.0%);">0.0%</td><td><strong>NEXT Public Beta / Commercial: Consumer public beta and commercial release, officially named HarmonyOS 5. Pure HarmonyOS milestone. Officially established the ArkTS declarative development paradigm and completely shifted to native architecture.</strong></td></tr>
+<tr><td>12</td><td><b>HarmonyOS 5/NEXT</b> <sup class="beta">LITE</sup> <sup class="paren">WEARABLE</sup></td><td>2024-09-19</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.0%, var(--usage-bar-end) 0.0%);">0.0%</td><td>Dedicated for wearable devices, a lightweight version based on the LiteOS kernel.</td></tr>
+<tr><td>12</td><td><b>NEXT</b> <sup class="beta">DEVELOPER BETA 1</sup></td><td>2024-06-21</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.0%, var(--usage-bar-end) 0.0%);">0.0%</td><td>First public developer beta, an "all-scenario" intelligent system.</td></tr>
+<tr><td>11</td><td><b>NEXT</b> <sup class="beta">DEVELOPER PREVIEW 1</sup> <sup class="paren">CANARY</sup></td><td>2024-01-18</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.0%, var(--usage-bar-end) 0.0%);">0.0%</td><td>Added numerous ArkTS APIs, expanded distributed hardware support.</td></tr>
+<tr><td>10</td><td><b>NEXT</b> <sup class="beta">DEVELOPER PREVIEW 1</sup></td><td>2023-10-26</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.0%, var(--usage-bar-end) 0.0%);">0.0%</td><td>Added PC/Tablet mode support, based on OpenHarmony 4.0.</td></tr>
+<tr><td>9</td><td><b>NEXT</b> <sup class="beta">DEVELOPER PREVIEW 1</sup> <sup class="paren">INTERNAL</sup></td><td>2023-08-04</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.0%, var(--usage-bar-end) 0.0%);">0.0%</td><td>Internal developer preview, based on OpenHarmony 3.2.</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="en-双框架">Dual Framework</h2>
+<div class="table-responsive">
+<table>
+<thead><tr><th>API</th><th>Corresponding System Version</th><th>Release Date</th><th>Supported Android Version</th><th>Remarks</th></tr></thead><tbody>
+<tr><td>-</td><td><b>HarmonyOS 4.5</b> <sup class="paren">TV</sup></td><td>2024-09-24</td><td>Android 12</td><td>Only for Vision TV series smart TVs.</td></tr>
+<tr><td>-</td><td><b>HarmonyOS 4.3.1</b></td><td>2025-07-10</td><td>Android 12</td><td>Continued support, the final Dual Framework LTS version (same origin as EMUI 15).</td></tr>
+<tr><td>-</td><td><b>HarmonyOS 4.3.0</b></td><td>2024-11-26</td><td>Android 12</td><td>Mate 70 series and Mate X6 non-pioneer SKUs launched in China on November 26, 2024.</td></tr>
+<tr><td>10</td><td><b>HarmonyOS 4.2.0</b></td><td>2024-04-26</td><td>Android 11/12</td><td>Pura 70 series flagship models come pre-installed with HarmonyOS 4.2 incremental update.</td></tr>
+<tr><td>10</td><td><b>HarmonyOS 4.0.0</b></td><td>2023-08-18</td><td>Android 10/11/12</td><td>Higher-level API feature set, improvements to system animation smoothness, and visual optimization of the user interface.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_1_202305-0000001582097989-V2" target="_blank" rel="noopener">9</a></td><td><b>HarmonyOS 3.1</b></td><td>2023-05-15</td><td>Android 9/10/11/12</td><td>Optimized for Qualcomm Snapdragon chips, improved system animation smoothness.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_1_202303-0000001553985573-V2" target="_blank" rel="noopener">9</a></td><td><b>HarmonyOS 3.1</b> <sup class="beta">BETA2</sup></td><td>2023-04-19</td><td>Android 9/10/11/12</td><td>Some interfaces added or changed.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_202302-0000001499901657-V2" target="_blank" rel="noopener">9</a></td><td><b>HarmonyOS 3.1</b> <sup class="beta">BETA1</sup></td><td>2023-02-16</td><td>Android 9/10/11/12</td><td>Some interfaces added or changed to support interface error codes.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_202211-0000001384974906-V2" target="_blank" rel="noopener">8</a></td><td><b>HarmonyOS 3.1</b> <sup class="beta">DEVELOPER PREVIEW</sup> <sup class="milestone">Milestone</sup></td><td>2022-11-04</td><td>Android 9/10/11/12</td><td><strong>Newly introduced application development Stage model.</strong></td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_202209-0000001323985308-V2" target="_blank" rel="noopener">8</a></td><td><b>HarmonyOS 3.0.0</b> <sup class="milestone">Milestone</sup></td><td>2022-09-06</td><td>Android 9/10/11/12</td><td><strong>Introduced declarative programming (ArkTS), enhanced super device connectivity; stopped supporting Java language.</strong></td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_202206-0000001273887550-V2" target="_blank" rel="noopener">7</a></td><td><b>HarmonyOS 3.0</b> <sup class="beta">BETA</sup></td><td>2022-07-06</td><td>Android 9/10/11/12</td><td>This release is HarmonyOS 3.0 Beta, available for developing applications based on API Version 8.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_202202-0000001193097180-V2" target="_blank" rel="noopener">7</a></td><td><b>HarmonyOS 3.0</b> <sup class="beta">PREVIEW 2</sup></td><td>2022-02-26</td><td>Android 9/10/11/12</td><td>Added two TS text input components.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_202110-0000001167203136-V2" target="_blank" rel="noopener">7</a></td><td><b>HarmonyOS 3.0</b> <sup class="beta">PREVIEW</sup></td><td>2021-10-22</td><td>Android 9/10/11/12</td><td>JS UI officially named ArkUI.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_2_20210915-0000001153993146-V2" target="_blank" rel="noopener">6</a></td><td><b>HarmonyOS 2.2.0.3</b></td><td>2021-09-15</td><td>Android 9/10/11</td><td>Hybrid dual framework (Linux+AOSP), first introduced HAP application format, supports phones/tablets/wearables.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_2_20210625-0000001123724872-V2" target="_blank" rel="noopener">6</a></td><td><b>HarmonyOS 2.2.0.1</b> <sup class="beta">BETA</sup></td><td>2021-06-25</td><td>Android 9/10/11</td><td>This release is HarmonyOS SDK 2.2 Beta 1.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_2_202104-0000001104117222-V2" target="_blank" rel="noopener">5</a></td><td><b>HarmonyOS 2.1.1.20</b></td><td>2021-04-30</td><td>Android 9/10/11</td><td>This release is HarmonyOS SDK 2.1 Release, with no additions or changes to interface content compared to the previous version.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_2_202103-0000001139956937-V2" target="_blank" rel="noopener">5</a></td><td><b>HarmonyOS 2.x</b> <sup class="beta">BETA</sup></td><td>2021-03-21</td><td>Android 9/10</td><td>Distributed and basic capability enhancements.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_2_202012-0000001139855219-V2" target="_blank" rel="noopener">4</a></td><td><b>HarmonyOS 2.x</b> <sup class="beta">BETA</sup></td><td>2020-12-16</td><td>Android 9/10</td><td>Based on the previous version, updated support for phones, provided to developers for phone device Beta.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_2_202009-0000001093177566-V2" target="_blank" rel="noopener">3</a></td><td><b>HarmonyOS 2.0.0</b> <sup class="beta">BETA</sup></td><td>2020-09-11</td><td>Android 9/10</td><td>HarmonyOS 2.0 first Beta version, supports more device categories, including Huawei Vision Screens, smart wearables, and in-vehicle devices for developer beta based on HarmonyOS.</td></tr>
+<tr><td>5</td><td><b>HarmonyOS 1.0.0</b> <sup class="paren">TV</sup></td><td>2019-08-09</td><td>Android 9</td><td>First generation version, based on LiteOS+Linux kernel+AOSP compatibility layer, only used for smart TVs and IoT devices.</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="en-版本类型说明">Version Type Description</h2>
+<div class="table-responsive">
+<table>
+<thead><tr><th>Type</th><th>Description</th><th>Purpose</th></tr></thead><tbody>
+<tr><td>Canary</td><td>Early access version, features are pending stabilization.</td><td>Can report issues, Huawei will strive to resolve them.</td></tr>
+<tr><td>Beta</td><td>Publicly released Beta version, features are pending stabilization.</td><td>Can report usage experience to improve the product.</td></tr>
+<tr><td>Release</td><td>Officially released version, quality guaranteed, features are stable.</td><td>Can complete development based on new features and release applications.</td></tr>
+</tbody>
+</table>
+</div>
+<h2>HarmonyOS Supported Device Model List</h2>
+<h3 id="en-device-手机">Phones</h3>
+<div class="table-responsive"><table>
+<thead><tr><th>Device Series</th><th>Device Model</th><th>Model Code</th><th>Supported Version</th></tr></thead><tbody>
+<tr><td><b>Mate 60 Series</b></td><td>Mate 60</td><td>BRA-AL00</td><td>6.1.0</td></tr>
+<tr><td></td><td>Mate 60 Pro</td><td>ALN-AL00, ALN-AL80</td><td>6.1.0</td></tr>
+<tr><td></td><td>Mate 60 Pro+</td><td>ALN-AL10</td><td>6.1.0</td></tr>
+<tr><td></td><td>Mate 60 RS Ultimate Design</td><td>ALN-AL10</td><td>6.1.0</td></tr>
+<tr><td><b>Mate 70 Air</b></td><td>Mate 70 Air</td><td>SUP-AL90, SUP-AL90a</td><td>6.1.1</td></tr>
+<tr><td><b>Mate 70 Series</b></td><td>Mate 70</td><td>CLS-AL00, CLS-AL30</td><td>6.1.0</td></tr>
+<tr><td></td><td>Mate 70 Air</td><td>SUP-AL90, SUP-AL90a</td><td>6.1.0</td></tr>
+<tr><td></td><td>Mate 70 Pro</td><td>PLR-AL00, PLR-AL30</td><td>6.1.0</td></tr>
+<tr><td></td><td>Mate 70 Pro Premium Edition</td><td>PLR-AL50</td><td>6.1.0</td></tr>
+<tr><td></td><td>Mate 70 Pro+</td><td>PLA-AL10</td><td>6.1.0</td></tr>
+<tr><td></td><td>Mate 70 RS Ultimate Design</td><td>PLU-AL10</td><td>6.1.0</td></tr>
+<tr><td><b>Mate 80 Series</b></td><td>Mate 80</td><td>VYG-AL00, VYG-AL30</td><td>6.1.1</td></tr>
+<tr><td></td><td>Mate 80 Pro</td><td>SGT-AL00, SGT-AL50</td><td>6.1.1</td></tr>
+<tr><td></td><td>Mate 80 Pro Max</td><td>SGT-AL10</td><td>6.1.1</td></tr>
+<tr><td></td><td>Mate 80 RS Ultimate Design</td><td>SGU-AL10</td><td>6.1.1</td></tr>
+<tr><td><b>Mate X5 Series</b></td><td>Mate X5</td><td>ALT-AL10</td><td>6.1.0</td></tr>
+<tr><td></td><td>Mate X5 Collector's Edition</td><td>ALT-AL10</td><td>6.1.0</td></tr>
+<tr><td><b>Mate X6 Series</b></td><td>Mate X6</td><td>ICL-AL10</td><td>6.1.0</td></tr>
+<tr><td></td><td>Mate X6 Collector's Edition</td><td>ICL-AL20</td><td>6.1.0</td></tr>
+<tr><td><b>Mate X7 Series</b></td><td>Mate X7</td><td>DEL-AL10</td><td>6.1.1</td></tr>
+<tr><td></td><td>Mate X7 Collector's Edition</td><td>DEL-AL20</td><td>6.1.1</td></tr>
+<tr><td><b>Mate XTs Series</b></td><td>Mate XTs Ultimate Design</td><td>GRL-AL20</td><td>5.1.1</td></tr>
+<tr><td><b>Mate XT Series</b></td><td>Mate XT Ultimate Design</td><td>GRL-AL10</td><td>6.1.0</td></tr>
+<tr><td></td><td>Mate XTs Ultimate Design</td><td>GRL-AL20</td><td>6.1.1</td></tr>
+<tr><td><b>Pocket 2 Series</b></td><td>Pocket 2</td><td>LEM-AL00</td><td>6.1.0</td></tr>
+<tr><td></td><td>Pocket 2 Premium Edition</td><td>LEM-AL50</td><td>6.1.0</td></tr>
+<tr><td></td><td>Pocket 2 Art Custom Edition</td><td>LEM-AL00</td><td>6.1.0</td></tr>
+<tr><td><b>Pura 70 Series</b></td><td>Pura 70</td><td>ADY-AL00</td><td>6.1.0</td></tr>
+<tr><td></td><td>Pura 70 Pro</td><td>HBN-AL00</td><td>6.1.0</td></tr>
+<tr><td></td><td>Pura 70 Pro+</td><td>HBN-AL10, HBN-AL80</td><td>6.1.0</td></tr>
+<tr><td></td><td>Pura 70 Ultra</td><td>HBP-AL00</td><td>6.1.0</td></tr>
+<tr><td></td><td>Pura 70 BeiDou Satellite Messaging Edition</td><td>ADY-AL10</td><td>6.1.0</td></tr>
+<tr><td><b>Pura 80 Series</b></td><td>Pura 80</td><td>HED-AL00</td><td>6.1.0</td></tr>
+<tr><td></td><td>Pura 80 Pro</td><td>LMR-AL00</td><td>6.1.0</td></tr>
+<tr><td></td><td>Pura 80 Pro+</td><td>LMR-AL10</td><td>6.1.0</td></tr>
+<tr><td></td><td>Pura 80 Ultra</td><td>LMR-AL10</td><td>6.1.0</td></tr>
+<tr><td><b>Pura 90 Series</b></td><td>Pura 90</td><td>KEE-AL00</td><td>6.1.1</td></tr>
+<tr><td></td><td>Pura 90 Pro</td><td>MLN-AL00</td><td>6.1.1</td></tr>
+<tr><td></td><td>Pura 90 Pro Max</td><td>SCA-AL00</td><td>6.1.1</td></tr>
+<tr><td><b>Pura X Max Series</b></td><td>Pura X Max</td><td>HOP-AL00</td><td>6.1.1</td></tr>
+<tr><td></td><td>Pura X Max Collector's Edition</td><td>HOP-AL10</td><td>6.1.1</td></tr>
+<tr><td><b>Pura X Series</b></td><td>Pura X</td><td>VDE-AL00</td><td>6.1.0</td></tr>
+<tr><td></td><td>Pura X Collector's Edition</td><td>VDE-AL10</td><td>6.1.0</td></tr>
+<tr><td><b>nova 12 Series</b></td><td>nova 12</td><td>BLK-AL00</td><td>6.1.0</td></tr>
+<tr><td></td><td>nova 12 Pro</td><td>ADA-AL00</td><td>6.1.0</td></tr>
+<tr><td></td><td>nova 12 Ultra</td><td>ADA-AL00U</td><td>6.1.0</td></tr>
+<tr><td></td><td>nova 12 Ultra Star Edition</td><td>ADA-AL10U</td><td>6.1.0</td></tr>
+<tr><td><b>nova 13 Series</b></td><td>nova 13</td><td>BLK-AL80</td><td>6.1.0</td></tr>
+<tr><td></td><td>nova 13 Pro</td><td>MIS-AL00</td><td>6.1.0</td></tr>
+<tr><td><b>nova 14 Series</b></td><td>nova 14</td><td>TLR-AL00</td><td>6.1.0</td></tr>
+<tr><td></td><td>nova 14 Pro</td><td>MIA-AL00</td><td>6.1.0</td></tr>
+<tr><td></td><td>nova 14 Ultra</td><td>MRT-AL10</td><td>6.1.0</td></tr>
+<tr><td></td><td>nova 14 Vibrant Edition</td><td>TYR-AL00</td><td>6.1.0</td></tr>
+<tr><td><b>nova 15 Series</b></td><td>nova 15</td><td>PSN-AL00</td><td>6.1.1</td></tr>
+<tr><td></td><td>nova 15 Ultra</td><td>SLY-AL00</td><td>6.1.1</td></tr>
+<tr><td></td><td>nova 15 pro</td><td>KLE-AL00U</td><td>6.1.1</td></tr>
+<tr><td><b>nova Flip Series</b></td><td>nova Flip</td><td>PSD-AL00</td><td>6.1.0</td></tr>
+<tr><td></td><td>nova Flip S</td><td>PSD-AL80</td><td>6.1.0</td></tr>
+<tr><td><b>Enjoy 70X Series</b></td><td>Enjoy 70X Premium Edition</td><td>BRE-AL80a</td><td>6.1.0</td></tr>
+<tr><td><b>Enjoy 90 Series</b></td><td>Enjoy 90</td><td>JUY-AL80</td><td>6.1.1</td></tr>
+<tr><td></td><td>Enjoy 90 Plus</td><td>JUY-AL50</td><td>6.1.1</td></tr>
+<tr><td></td><td>Enjoy 90 Pro Max</td><td>CHZ-AL00</td><td>6.1.1</td></tr>
+<tr><td></td><td>Enjoy 90m Plus</td><td>JUY-AL50</td><td>6.1.1</td></tr>
+</tbody></table></div>
+<h3 id="en-device-平板">Tablets</h3>
+<div class="table-responsive"><table>
+<thead><tr><th>Device Series</th><th>Device Model</th><th>Model Code</th><th>Supported Version</th></tr></thead><tbody>
+<tr><td><b>Others</b></td><td>MatePad 11.5 2026 Model</td><td>TXZ-W10, TXZ-W20, TXZ-AL10</td><td>6.1.1</td></tr>
+<tr><td></td><td>MatePad 11.5 S</td><td>TGR-W00/W00G, TGR-W10/W10G, TGR-W20, TGR-W40</td><td>6.1.0</td></tr>
+<tr><td></td><td>MatePad 11.5 S 2025</td><td>SLG-W50</td><td>5.0.5</td></tr>
+<tr><td></td><td>MatePad 11.5 S 2025 Model</td><td>SLG-W00, SLG-W30, SLG-W60</td><td>6.1.1</td></tr>
+<tr><td></td><td>MatePad Air 12-inch 2025</td><td>LRT-W00</td><td>5.0.5</td></tr>
+<tr><td></td><td>MatePad Air 12-inch 2024</td><td>BKY-W00, BKY-W10, BKY-W20, BKY-W21</td><td>6.1.0</td></tr>
+<tr><td></td><td>MatePad Air 12-inch 2025</td><td>LRT-W00, LRT-W20, LRT-W30</td><td>6.1.1</td></tr>
+<tr><td></td><td>MatePad Edge</td><td>QXS-W00, QXS-W10, QXS-W20</td><td>6.1.1</td></tr>
+<tr><td></td><td>MatePad Mini</td><td>MLR-AL10</td><td>6.1.1</td></tr>
+<tr><td></td><td>MatePad Mini Reader Edition</td><td>MLR-AL00</td><td>6.1.1</td></tr>
+<tr><td></td><td>MatePad Pro 11-inch 2024</td><td>XYAO-W00</td><td>6.1.0</td></tr>
+<tr><td></td><td>MatePad Pro 12.2-inch 2024</td><td>MRO-AL10, MRO-W00, MRO-W10</td><td>6.1.0</td></tr>
+<tr><td></td><td>MatePad Pro 12.2-inch 2025</td><td>MRDI-W00, MRDI-W10, MRDI-W20</td><td>6.1.0</td></tr>
+<tr><td></td><td>MatePad Pro 13.2-inch 2023</td><td>PCE-AL30, PCE-W30, PCE-W40</td><td>6.1.0</td></tr>
+<tr><td></td><td>MatePad Pro 13.2-inch 2023 Collector's Edition</td><td>PCE-AL40</td><td>6.1.0</td></tr>
+<tr><td></td><td>MatePad Pro 13.2-inch 2025</td><td>WEB-AL00, WEB-AL10, WEB-W00, WEB-W10</td><td>6.1.0</td></tr>
+</tbody></table></div>
+<h3 id="en-device-pc">PC</h3>
+<div class="table-responsive"><table>
+<thead><tr><th>Device Series</th><th>Device Model</th><th>Model Code</th><th>Supported Version</th></tr></thead><tbody>
+<tr><td><b>Others</b></td><td>HUAWEI MateBook 14</td><td>MNT-W54C</td><td>6.1.0</td></tr>
+<tr><td></td><td>MateBook Fold Ultimate Design</td><td>HPR-W72</td><td>6.1.0</td></tr>
+<tr><td></td><td>MateBook Pro</td><td>HAD-W32</td><td>6.1.0</td></tr>
+</tbody></table></div>
+<h3 id="en-device-穿戴">Wearables</h3>
+<div class="table-responsive"><table>
+<thead><tr><th>Device Series</th><th>Device Model</th><th>Model Code</th><th>Supported Version</th></tr></thead><tbody>
+<tr><td><b>Others</b></td><td>HUAWEI WATCH 5</td><td>-</td><td>6.1.0</td></tr>
+<tr><td></td><td>HUAWEI WATCH FIT 4</td><td>-</td><td>6.1.0</td></tr>
+<tr><td></td><td>HUAWEI WATCH FIT 4 Pro</td><td>-</td><td>6.1.0</td></tr>
+<tr><td></td><td>HUAWEI WATCH FIT 5</td><td>-</td><td>6.1.1</td></tr>
+<tr><td></td><td>HUAWEI WATCH FIT 5 Pro</td><td>-</td><td>6.1.1</td></tr>
+<tr><td></td><td>HUAWEI WATCH GT 6</td><td>-</td><td>6.1.0</td></tr>
+<tr><td></td><td>HUAWEI WATCH GT 6 Pro</td><td>-</td><td>6.1.0</td></tr>
+<tr><td></td><td>HUAWEI WATCH ULTIMATE DESIGN</td><td>-</td><td>6.0.1</td></tr>
+<tr><td></td><td>HUAWEI WATCH ULTIMATE DESIGN Star Diamond Edition</td><td>-</td><td>6.1.1</td></tr>
+<tr><td></td><td>HUAWEI WATCH ULTIMATE DESIGN Purple Gold Edition</td><td>-</td><td>6.1.0</td></tr>
+<tr><td></td><td>HUAWEI WATCH Ultimate 2</td><td>-</td><td>6.0.1</td></tr>
+<tr><td></td><td>HUAWEI WATCH Ultimate 2 Exploration Edition</td><td>-</td><td>6.1.0</td></tr>
+<tr><td></td><td>Supernova Watch X1</td><td>-</td><td>6.1.1</td></tr>
+<tr><td></td><td>Supernova Watch X1 Pro</td><td>-</td><td>6.1.1</td></tr>
+</tbody></table></div>
+<h3 id="en-device-iot">IoT</h3>
+<div class="table-responsive"><table>
+<thead><tr><th>Device Series</th><th>Device Model</th><th>Model Code</th><th>Supported Version</th></tr></thead><tbody>
+<tr><td><b>MateTV Series</b></td><td>MateTV 65-inch</td><td>HD65EDIH</td><td>5.1.1</td></tr>
+<tr><td></td><td>MateTV 75-inch</td><td>HD75EDIH</td><td>5.1.1</td></tr>
+<tr><td></td><td>MateTV 85-inch</td><td>HD8XEDIH</td><td>5.1.1</td></tr>
+<tr><td></td><td>MateTV 98-inch</td><td>HD98EDIH</td><td>5.1.1</td></tr>
+<tr><td></td><td>MateTV Pro 75-inch</td><td>HD75EDIJ</td><td>5.1.1</td></tr>
+<tr><td></td><td>MateTV Pro 85-inch</td><td>HD8XEDIJ</td><td>5.1.1</td></tr>
+<tr><td></td><td>MateTV Pro 98-inch</td><td>HD98EDIJ</td><td>5.1.1</td></tr>
+</tbody></table></div>
+<h3 id="en-device-预览版支持">Preview Support</h3>
+<div class="table-responsive"><table>
+<thead><tr><th>Device Type</th><th>Device Model</th><th>Model Code</th><th>Preview Version</th></tr></thead><tbody>
+<tr><td><b>Phone</b></td><td>Mate 80 Pro</td><td>SGT-AL00, SGT-AL50</td><td>26.0.0 Beta1</td></tr>
+<tr><td><b>Phone</b></td><td>Mate X7</td><td>DEL-AL10</td><td>26.0.0 Beta1</td></tr>
+<tr><td><b>Phone</b></td><td>Mate XTs Ultimate Design</td><td>GRL-AL20</td><td>26.0.0 Beta1</td></tr>
+<tr><td><b>Phone</b></td><td>Pura 90 Pro Max</td><td>SCA-AL00</td><td>26.0.0 Beta1</td></tr>
+<tr><td><b>Phone</b></td><td>Pura X</td><td>VDE-AL00</td><td>26.0.0 Beta1</td></tr>
+<tr><td><b>Phone</b></td><td>Pura X Collector's Edition</td><td>VDE-AL10</td><td>26.0.0 Beta1</td></tr>
+<tr><td><b>Phone</b></td><td>nova 15 pro</td><td>KLE-AL00U</td><td>26.0.0 Beta1</td></tr>
+</tbody></table></div>
+<h2>Data Sources</h2>
+<p class="source-links">
+<a href="https://en.wikipedia.org/wiki/HarmonyOS_version_history" target="_blank" rel="noopener">Wikipedia: HarmonyOS version history</a>
+<a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/sdk-version-percentage" target="_blank" rel="noopener">Huawei Developer Docs: SDK Version Usage Rate</a>
+<a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/support-device" target="_blank" rel="noopener">Huawei Developer Docs: Supported Device Model List</a>
+</p>
+</div>
+</div>
+<div class="container">
+<div id="site-footer">
+<p>
+© 2026 <a href="https://github.com/secnotes" target="_blank">Security Notes</a>
+<span class="separator">|</span>
+<a href="https://github.com/secnotes/hoapi" target="_blank" class="github-link">
+<svg class="github-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.938 9.9 9.207 11.387.68.113.893-.261.893-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.218.694.825.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+Star on GitHub
+</a>
+</p>
+<p>
+Inspired by <a href="https://apilevels.com/" target="_blank">Android API Levels</a>
+</p>
+</div>
+</div>
+</div>
+<script>
+(function() {
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme) {
+        document.documentElement.setAttribute("data-theme", savedTheme);
+    } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        document.documentElement.setAttribute("data-theme", "dark");
+    } else {
+        document.documentElement.setAttribute("data-theme", "light");
+    }
+
+    const toggleTheme = () => {
+        const currentTheme = document.documentElement.getAttribute("data-theme");
+        const newTheme = currentTheme === "dark" ? "light" : "dark";
+        document.documentElement.setAttribute("data-theme", newTheme);
+        localStorage.setItem("theme", newTheme);
+    };
+
+    document.getElementById("theme-toggle").addEventListener("click", toggleTheme);
+
+    if (window.matchMedia) {
+        window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
+            if (!localStorage.getItem("theme")) {
+                document.documentElement.setAttribute("data-theme", e.matches ? "dark" : "light");
+            }
+        });
+    }
+})();
+</script>
+<script>
+(function() {
+    const zh = document.getElementById("page-zh");
+    const en = document.getElementById("page-en");
+    const toggle = document.getElementById("lang-toggle");
+    if (!zh || !en || !toggle) return;
+
+    function applyLang(lang) {
+        document.documentElement.setAttribute("data-lang", lang);
+        localStorage.setItem("lang", lang);
+        zh.hidden = lang !== "zh";
+        en.hidden = lang !== "en";
+        toggle.textContent = lang === "zh" ? "EN" : "中";
+        toggle.title = lang === "zh" ? "English" : "中文";
+    }
+
+    applyLang(localStorage.getItem("lang") || "zh");
+
+    toggle.addEventListener("click", () => {
+        const cur = document.documentElement.getAttribute("data-lang");
+        applyLang(cur === "zh" ? "en" : "zh");
+    });
+})();
+</script>
 </body>
 </html>

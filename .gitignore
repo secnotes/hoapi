@@ -8,3 +8,6 @@ __pycache__/
 .eggs/
 dist/
 build/
+
+# 本地环境变量（含密钥，请勿提交；.env.example 保留入库）
+.env

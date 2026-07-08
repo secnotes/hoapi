@@ -1,15 +1,25 @@
 #!/usr/bin/env python3
 """
 HarmonyOS API HTML 生成脚本
-将 hoapi.md 转换为带样式的 HTML 页面
-同时整合设备支持清单 (hodevice.md)
+将 hoapi.md 转换为带样式的 HTML 页面，同时整合设备支持清单 (hodevice.md)。
+
+可选 AI 翻译：提供 AI_BASE_URL / AI_MODEL / AI_API_KEY（环境变量或入参）时，
+构建时将中文 HTML 整文件翻译为英文，生成单文件双语版（按钮切换中/英）；
+未配置时仅生成中文版（不渲染语言按钮）。
 """
 
 import datetime
 import html
 import os
 import re
+import time
 
+import requests  # AI 翻译调用（OpenAI 兼容）
+
+
+# ============================================================================
+# 工具函数
+# ============================================================================
 
 def get_last_updated(*files):
     """取数据文件最近修改时间（YYYY-MM-DD），用于页面显示「最近更新」"""
@@ -22,79 +32,28 @@ def get_last_updated(*files):
     return datetime.datetime.fromtimestamp(latest).strftime('%Y-%m-%d')
 
 
-def parse_device_md(md_content):
-    """解析设备支持清单 MD 文件，返回 HTML 内容"""
-    lines = md_content.split('\n')
-    html_parts = []
-
-    in_table = False
-    current_series = None
-    is_first_row = False  # 标记是否是表头后的第一行
-    main_title = None  # 存储一级标题
-
-    for line in lines:
-        stripped = line.strip()
-
-        # 提取一级标题
-        if stripped.startswith('# '):
-            main_title = stripped[2:]  # 去掉 "# "
-            continue
-        elif stripped.startswith('> '):
-            continue
-
-        # 处理章节标题
-        elif stripped.startswith('## '):
-            if in_table:
-                html_parts.append('</tbody></table></div>')
-                in_table = False
-            section_title = stripped[3:]
-            html_parts.append(f'<h3 id="device-{section_title.lower()}">{section_title}</h3>')
-            html_parts.append('<div class="table-responsive"><table>')
-            in_table = True
-            current_series = None
-            is_first_row = True  # 新表格开始，下一行为表头
-
-        # 处理表格行
-        elif stripped.startswith('|') and in_table:
-            # 拆分并保留空单元格位置
-            raw_cells = stripped.split('|')
-            # 去掉首尾的空元素（由|开头和结尾产生）
-            if raw_cells and raw_cells[0] == '':
-                raw_cells = raw_cells[1:]
-            if raw_cells and raw_cells[-1] == '':
-                raw_cells = raw_cells[:-1]
-            cells = [c.strip() for c in raw_cells]
-
-            # 跳过分隔行（如 |----|----|）
-            if not cells or all(set(c) <= set('-:|') for c in cells):
-                continue
-
-            # 第一行是 MD 表头，转成 HTML thead
-            if is_first_row:
-                th = ''.join(f'<th>{html.escape(c)}</th>' for c in cells)
-                html_parts.append(f'<thead><tr>{th}</tr></thead><tbody>')
-                is_first_row = False
-                continue
-
-            # 判断是否有设备系列（非空的第一列）
-            if len(cells) >= 4:
-                series = html.escape(cells[0]) if cells[0] else ''
-                model = html.escape(cells[1])
-                code = html.escape(cells[2])
-                version = html.escape(cells[3])
-
-                if series:
-                    current_series = series
-                    html_parts.append(f'<tr><td><b>{series}</b></td><td>{model}</td><td>{code}</td><td>{version}</td></tr>')
-                else:
-                    html_parts.append(f'<tr><td></td><td>{model}</td><td>{code}</td><td>{version}</td></tr>')
-
-            is_first_row = False
-
-    if in_table:
-        html_parts.append('</tbody></table></div>')
-
-    return main_title, '\n'.join(html_parts)
+def load_env(env_file='.env'):
+    """简单解析脚本同目录下的 .env 文件并加载到 os.environ（不覆盖已存在的值）。
+    避免引入 python-dotenv 依赖。优先级：generate_html 入参 > 系统/Shell 环境变量 > .env。"""
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), env_file)
+    if not os.path.exists(path):
+        return
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith('#') or '=' not in line:
+                    continue
+                key, _, val = line.partition('=')
+                key = key.strip()
+                val = val.strip()
+                # 去除两端成对引号
+                if len(val) >= 2 and val[0] == val[-1] and val[0] in ('"', "'"):
+                    val = val[1:-1]
+                if key and key not in os.environ:
+                    os.environ[key] = val
+    except Exception:
+        pass
 
 
 def find_latest_api(lines, section_start_idx, section_end_idx):
@@ -108,7 +67,6 @@ def find_latest_api(lines, section_start_idx, section_end_idx):
             cells = [c.strip() for c in line.split('|')]
             cells = [c for c in cells if c]
             if len(cells) >= 4 and cells[0] not in ['API', '']:
-                # 提取 API 数字
                 api_cell = cells[0]
                 link_match = re.match(r'\[(\d+)\]', api_cell)
                 if link_match:
@@ -126,14 +84,82 @@ def find_latest_api(lines, section_start_idx, section_end_idx):
     return max_api, max_api_line_idx
 
 
-def md_to_html(md_content, device_content=None, last_updated=''):
-    """将Markdown内容转换为HTML"""
+# ============================================================================
+# 内容解析
+# ============================================================================
+
+def parse_device_md(md_content):
+    """解析设备支持清单 MD 文件，返回 (主标题, HTML 内容)"""
+    lines = md_content.split('\n')
+    html_parts = []
+
+    in_table = False
+    current_series = None
+    is_first_row = False  # 标记是否是表头后的第一行
+    main_title = None  # 存储一级标题
+
+    for line in lines:
+        stripped = line.strip()
+
+        if stripped.startswith('# '):
+            main_title = stripped[2:]  # 去掉 "# "
+            continue
+        elif stripped.startswith('> '):
+            continue
+        elif stripped.startswith('## '):
+            if in_table:
+                html_parts.append('</tbody></table></div>')
+                in_table = False
+            section_title = stripped[3:]
+            html_parts.append(f'<h3 id="device-{section_title.lower()}">{section_title}</h3>')
+            html_parts.append('<div class="table-responsive"><table>')
+            in_table = True
+            current_series = None
+            is_first_row = True  # 新表格开始，下一行为表头
+        elif stripped.startswith('|') and in_table:
+            raw_cells = stripped.split('|')
+            if raw_cells and raw_cells[0] == '':
+                raw_cells = raw_cells[1:]
+            if raw_cells and raw_cells[-1] == '':
+                raw_cells = raw_cells[:-1]
+            cells = [c.strip() for c in raw_cells]
+
+            # 跳过分隔行
+            if not cells or all(set(c) <= set('-:|') for c in cells):
+                continue
+
+            # 第一行是 MD 表头，转成 HTML thead
+            if is_first_row:
+                th = ''.join(f'<th>{html.escape(c)}</th>' for c in cells)
+                html_parts.append(f'<thead><tr>{th}</tr></thead><tbody>')
+                is_first_row = False
+                continue
+
+            if len(cells) >= 4:
+                series = html.escape(cells[0]) if cells[0] else ''
+                model = html.escape(cells[1])
+                code = html.escape(cells[2])
+                version = html.escape(cells[3])
+                if series:
+                    current_series = series
+                    html_parts.append(f'<tr><td><b>{series}</b></td><td>{model}</td><td>{code}</td><td>{version}</td></tr>')
+                else:
+                    html_parts.append(f'<tr><td></td><td>{model}</td><td>{code}</td><td>{version}</td></tr>')
+
+            is_first_row = False
+
+    if in_table:
+        html_parts.append('</tbody></table></div>')
+
+    return main_title, '\n'.join(html_parts)
+
+
+def render_md(md_content, device_content):
+    """渲染 hoapi.md 的标题/表格/段落 + 设备清单 + 数据来源章节为 HTML
+    （不含 site-title/intro/toc/footer/chrome）。"""
     lines = md_content.split('\n')
 
-    # HTML 样式模板
-    html_parts = get_html_template(last_updated)
-
-    # 先扫描找出单框架部分的最大 API
+    # 扫描单框架部分的最大 API（用于自动 NEW 标签）
     single_start = -1
     single_end = -1
     for i, line in enumerate(lines):
@@ -146,19 +172,19 @@ def md_to_html(md_content, device_content=None, last_updated=''):
     if single_start >= 0 and single_end < 0:
         single_end = len(lines)
 
-    latest_api, latest_api_line_idx = -1, -1
+    latest_api = -1
     if single_start >= 0 and single_end > single_start:
-        latest_api, latest_api_line_idx = find_latest_api(lines, single_start, single_end)
+        latest_api, _ = find_latest_api(lines, single_start, single_end)
 
+    html_parts = []
     in_table = False
     current_section = ''
-    current_api = None  # 当前行的 API 数字
-    source_links = []  # 收集数据来源链接
+    current_api = None
+    source_links = []
 
     for line in lines:
         stripped = line.strip()
 
-        # 处理标题
         if stripped.startswith('# '):
             continue
         elif stripped.startswith('## '):
@@ -168,32 +194,18 @@ def md_to_html(md_content, device_content=None, last_updated=''):
                 in_table = False
             section_title = stripped[3:]
             current_section = section_title
-            # 跳过数据来源章节，稍后处理
             if section_title == '数据来源':
                 continue
-            i18n_key = None
-            if section_title == '单框架':
-                i18n_key = 'section-single'
-            elif section_title == '双框架':
-                i18n_key = 'section-dual'
-            elif section_title == '版本类型说明':
-                i18n_key = 'section-notes'
-            if i18n_key:
-                html_parts.append(f'<h2 id="{section_title.lower().replace(" ", "-")}" data-i18n="{i18n_key}">{section_title}</h2>')
-            else:
-                html_parts.append(f'<h2 id="{section_title.lower().replace(" ", "-")}">{section_title}</h2>')
+            html_parts.append(f'<h2 id="{section_title.lower().replace(" ", "-")}">{section_title}</h2>')
         elif stripped.startswith('### '):
             html_parts.append(f'<h3>{stripped[4:]}</h3>')
         elif stripped.startswith('#### '):
             html_parts.append(f'<h4 id="{stripped[5:].lower().replace(" ", "-")}">{stripped[5:]}</h4>')
-        # 处理表格
         elif stripped.startswith('|'):
             cells = [c.strip() for c in stripped.split('|')]
             cells = [c for c in cells if c]
-
             if not cells:
                 continue
-
             if all(set(c) <= set('-:|') for c in cells):
                 continue
 
@@ -203,13 +215,9 @@ def md_to_html(md_content, device_content=None, last_updated=''):
                 in_table = True
 
             is_header = cells[0] in ['API', 'Version', '类型'] if cells else False
+            row_parts = ['<thead><tr>'] if is_header else ['<tr>']
 
-            if is_header:
-                row_parts = ['<thead><tr>']
-            else:
-                row_parts = ['<tr>']
-
-            # 提取当前行的 API 数字（用于判断是否是最新版本）
+            # 提取当前行 API 数字
             if not is_header and current_section == '单框架' and len(cells) > 0:
                 api_cell = cells[0]
                 link_match = re.match(r'\[(\d+)\]', api_cell)
@@ -217,51 +225,20 @@ def md_to_html(md_content, device_content=None, last_updated=''):
                     current_api = int(link_match.group(1))
                 else:
                     api_match = re.match(r'(\d+)', api_cell)
-                    if api_match:
-                        current_api = int(api_match.group(1))
-                    else:
-                        current_api = None
+                    current_api = int(api_match.group(1)) if api_match else None
 
             for i, cell in enumerate(cells):
-                # 转义原始文本，防止 <、>、& 被当作 HTML 解析；后续 markdown 标记（**、[link](url)、emoji）不受影响
+                # 转义原始文本，防止 <、>、& 被当作 HTML；后续 markdown 标记（**、[link](url)、emoji）不受影响
                 cell = html.escape(cell)
                 cell_processed = cell.replace('🔸', '<span class="beta">PREVIEW</span>')
                 cell_processed = cell_processed.replace('🔹', '<span class="stable">LATEST</span>')
                 cell_processed = cell_processed.replace('✅', '<span class="stable">ACTIVE</span>')
                 cell_processed = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', cell_processed)
 
-                # 处理超链接
+                # 处理超链接（仅第一列）
                 link_match = re.match(r'\[(.+?)\]\((.+?)\)', cell)
-                if link_match:
-                    link_text = link_match.group(1)
-                    link_url = link_match.group(2)
-                    if i == 0:
-                        cell_processed = f'<a href="{link_url}" target="_blank" rel="noopener">{link_text}</a>'
-
-                # 表头 i18n
-                if is_header:
-                    th_i18n_key = None
-                    if cell == 'API':
-                        th_i18n_key = 'th-api'
-                    elif cell == '对应系统版本':
-                        th_i18n_key = 'th-version'
-                    elif cell == '发布时间':
-                        th_i18n_key = 'th-date'
-                    elif cell == '使用率':
-                        th_i18n_key = 'th-usage'
-                    elif cell == '支持的 Android 版本':
-                        th_i18n_key = 'th-android'
-                    elif cell == '备注':
-                        th_i18n_key = 'th-note'
-                    elif cell == '类型':
-                        th_i18n_key = 'th-type'
-                    elif cell == '说明':
-                        th_i18n_key = 'th-desc'
-                    elif cell == '作用':
-                        th_i18n_key = 'th-purpose'
-
-                    if th_i18n_key:
-                        cell_processed = f'<span data-i18n="{th_i18n_key}">{cell}</span>'
+                if link_match and i == 0:
+                    cell_processed = f'<a href="{link_match.group(2)}" target="_blank" rel="noopener">{link_match.group(1)}</a>'
 
                 # 版本名称标签处理（自动给最新 API 添加 NEW 标签）
                 if i == 1 and not is_header and current_section not in ['版本类型说明']:
@@ -269,7 +246,6 @@ def md_to_html(md_content, device_content=None, last_updated=''):
                     note_col = cells[-1] if cells else ''
                     has_milestone = bool(re.search(r'\*\*[^*]+\*\*', note_col))
 
-                    # 判断是否是最新版本
                     is_latest = (current_section == '单框架' and current_api is not None and current_api == latest_api)
 
                     version_match = re.match(r'^HarmonyOS\s+\d+(?:\.(\d+|x|X))*(?:/\w+)?', version_name)
@@ -285,11 +261,8 @@ def md_to_html(md_content, device_content=None, last_updated=''):
                     if version_match:
                         pure_version = version_match.group()
                         suffix = version_name[len(pure_version):].strip()
-
-                        # 过滤掉手动添加的 "New" 或 "NEW"（改为自动添加）
-                        if suffix.upper() in ['NEW', 'NEW']:
+                        if suffix.upper() in ['NEW']:
                             suffix = ''
-
                         if suffix:
                             main_suffix, paren_tags = extract_paren_tags(suffix)
                             tag_parts = []
@@ -297,12 +270,10 @@ def md_to_html(md_content, device_content=None, last_updated=''):
                                 tag_parts.append(f' <sup class="beta">{main_suffix.upper()}</sup>')
                             for pt in paren_tags:
                                 tag_parts.append(f' <sup class="paren">{pt.upper()}</sup>')
-                            # 自动添加 NEW 标签
                             if is_latest:
                                 tag_parts.append(f' <sup class="beta">NEW</sup>')
                             cell_processed = f'<b>{pure_version}</b>{"".join(tag_parts)}{milestone_tag}'
                         else:
-                            # 无后缀时，仅添加 NEW 标签（如果是最新版本）
                             new_tag = f' <sup class="beta">NEW</sup>' if is_latest else ''
                             cell_processed = f'<b>{pure_version}</b>{new_tag}{milestone_tag}'
                     elif next_match:
@@ -333,9 +304,7 @@ def md_to_html(md_content, device_content=None, last_updated=''):
             if is_header:
                 row_parts.append('</thead><tbody>')
             html_parts.append(''.join(row_parts))
-        # 处理段落
         elif stripped and not in_table:
-            # 收集数据来源链接，而不是输出
             if current_section == '数据来源' and stripped.startswith('- https://'):
                 url = stripped[2:].strip()
                 link_text = 'Wikipedia: HarmonyOS version history' if 'wikipedia' in url else '华为开发者文档：SDK 版本使用率'
@@ -353,30 +322,29 @@ def md_to_html(md_content, device_content=None, last_updated=''):
         html_parts.append('</table>')
         html_parts.append('</div>')
 
-    # 添加设备支持清单
+    # 设备支持清单
     if device_content:
         device_title, device_html = parse_device_md(device_content)
         html_parts.append(f'<h2>{device_title}</h2>')
         html_parts.append(device_html)
 
-    # 添加数据来源章节（放到最后）
+    # 数据来源章节
     html_parts.append('<h2>数据来源</h2>')
     html_parts.append('<p class="source-links">')
     for link in source_links:
         html_parts.append(f'<a href="{link["url"]}" target="_blank" rel="noopener">{link["text"]}</a>')
-    # 添加设备支持清单来源链接
-    html_parts.append(f'<a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/support-device" target="_blank" rel="noopener">华为开发者文档：支持设备型号清单</a>')
+    html_parts.append('<a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/support-device" target="_blank" rel="noopener">华为开发者文档：支持设备型号清单</a>')
     html_parts.append('</p>')
-
-    # 页脚
-    html_parts.extend(get_html_footer())
 
     return '\n'.join(html_parts)
 
 
-def get_html_template(last_updated=''):
-    """返回 HTML 模板（样式和头部）"""
-    updated_tag = f'（最近更新：{last_updated}）' if last_updated else ''
+# ============================================================================
+# 外壳（chrome）：head/CSS/按钮/JS —— 语言无关，中英共用
+# ============================================================================
+
+def get_head():
+    """返回文档头部：DOCTYPE + html + head（含 <style>），到 </head>"""
     return [
         '<!DOCTYPE html>',
         '<html>',
@@ -469,7 +437,7 @@ def get_html_template(last_updated=''):
         '[data-theme="light"] #sun-icon { display: none; }',
         '[data-theme="light"] #moon-icon { display: block; }',
 
-        # 语言切换按钮
+        # 语言切换按钮（仅双语版渲染按钮，CSS 始终保留）
         '#lang-toggle { position: fixed; top: 1rem; right: 4rem; background: var(--table-header-bg); border: 1px solid var(--border-color); border-radius: 50%; width: 44px; height: 44px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.875rem; font-weight: 600; transition: all 0.3s ease; z-index: 1000; box-shadow: 0 2px 8px rgba(0,0,0,0.15); color: var(--text-color); }',
         '#lang-toggle:hover { transform: scale(1.1); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }',
 
@@ -561,52 +529,27 @@ def get_html_template(last_updated=''):
         '}',
         '</style>',
         '</head>',
-        '<body>',
-
-        # 主题切换按钮
-        '<button id="theme-toggle" title="切换主题">',
-        '<svg id="moon-icon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="2" fill="none"/></svg>',
-        '<svg id="sun-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2" fill="none"/><line x1="12" y1="1" x2="12" y2="3" stroke="currentColor" stroke-width="2"/><line x1="12" y1="21" x2="12" y2="23" stroke="currentColor" stroke-width="2"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke="currentColor" stroke-width="2"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" stroke="currentColor" stroke-width="2"/><line x1="1" y1="12" x2="3" y2="12" stroke="currentColor" stroke-width="2"/><line x1="21" y1="12" x2="23" y2="12" stroke="currentColor" stroke-width="2"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke="currentColor" stroke-width="2"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke="currentColor" stroke-width="2"/></svg>',
-        '</button>',
-        '<button id="lang-toggle" title="切换语言">中</button>',
-
-        # JavaScript
-        get_javascript(last_updated),
-
-        '<div class="container">',
-        '<h1 id="site-title"><a href="#" data-i18n="site-title">HarmonyOS API Levels</a></h1>',
-        f'<p id="intro" data-i18n="intro">这是鸿蒙系统 API 和系统版本映射关系参考表，涵盖单框架与双框架两个技术路线。单框架代表纯鸿蒙架构，双框架则兼容 Android 应用生态。使用率数据来源于华为官方，定期更新。{updated_tag}</p>',
-        # 目录
-        '\n'.join(get_toc_html()),
-        '</div>',
-        '<div class="container">',
-        '<div id="page-content">',
     ]
 
 
-def get_toc_html():
-    """返回目录 HTML"""
-    return [
-        '<div id="toc">',
-        '<h3 data-i18n="toc-title">目录</h3>',
-        '<ul>',
-        '<li><a href="#单框架" class="toc-section" data-i18n="section-single">单框架</a></li>',
-        '<li><a href="#双框架" class="toc-section" data-i18n="section-dual">双框架</a></li>',
-        '<li><a href="#版本类型说明" class="toc-section" data-i18n="section-notes">版本类型说明</a></li>',
-        '<li><a href="#device-手机" class="toc-sub" data-i18n="device-phone">手机</a></li>',
-        '<li><a href="#device-平板" class="toc-sub" data-i18n="device-tablet">平板</a></li>',
-        '<li><a href="#device-pc" class="toc-sub" data-i18n="device-pc">PC</a></li>',
-        '<li><a href="#device-穿戴" class="toc-sub" data-i18n="device-wearable">穿戴</a></li>',
-        '<li><a href="#device-iot" class="toc-sub" data-i18n="device-iot">IoT</a></li>',
-        '<li><a href="#device-预览版支持" class="toc-sub" data-i18n="device-preview">预览版支持</a></li>',
-        '</ul>',
-        '</div>',
-    ]
+def get_theme_toggle_button():
+    """主题切换按钮"""
+    return (
+        '<button id="theme-toggle" title="切换主题">'
+        '<svg id="moon-icon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="2" fill="none"/></svg>'
+        '<svg id="sun-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2" fill="none"/><line x1="12" y1="1" x2="12" y2="3" stroke="currentColor" stroke-width="2"/><line x1="12" y1="21" x2="12" y2="23" stroke="currentColor" stroke-width="2"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke="currentColor" stroke-width="2"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" stroke="currentColor" stroke-width="2"/><line x1="1" y1="12" x2="3" y2="12" stroke="currentColor" stroke-width="2"/><line x1="21" y1="12" x2="23" y2="12" stroke="currentColor" stroke-width="2"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke="currentColor" stroke-width="2"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke="currentColor" stroke-width="2"/></svg>'
+        '</button>'
+    )
 
 
-def get_javascript(last_updated=''):
-    """返回 JavaScript 代码"""
-    js = '''<script>
+def get_lang_toggle_button():
+    """语言切换按钮（仅双语版使用）"""
+    return '<button id="lang-toggle" title="切换语言">中</button>'
+
+
+def get_theme_js():
+    """主题切换 JS"""
+    return '''<script>
 (function() {
     const savedTheme = localStorage.getItem("theme");
     if (savedTheme) {
@@ -633,69 +576,65 @@ def get_javascript(last_updated=''):
             }
         });
     }
+})();
+</script>'''
 
-    const translations = {
-        "site-title": { zh: "HarmonyOS API Levels", en: "HarmonyOS API Levels" },
-        "intro": { zh: "这是鸿蒙系统 API 和系统版本映射关系参考表，涵盖单框架与双框架两个技术路线。单框架代表纯鸿蒙架构，双框架则兼容 Android 应用生态。使用率数据来源于华为官方，定期更新。", en: "This reference table documents the mapping between HarmonyOS API levels and system versions across both single-framework and dual-framework architectures. The single-framework represents pure HarmonyOS, while dual-framework maintains Android compatibility. Usage statistics are sourced from Huawei's official developer documentation and updated periodically." },
-        "toc-title": { zh: "目录", en: "Contents" },
-        "section-single": { zh: "单框架", en: "Single Framework" },
-        "section-dual": { zh: "双框架", en: "Dual Framework" },
-        "section-notes": { zh: "版本类型说明", en: "Version Types" },
-        "section-device": { zh: "设备支持清单", en: "Device Support List" },
-        "device-phone": { zh: "手机", en: "Phone" },
-        "device-tablet": { zh: "平板", en: "Tablet" },
-        "device-pc": { zh: "PC", en: "PC" },
-        "device-wearable": { zh: "穿戴", en: "Wearable" },
-        "device-iot": { zh: "IoT", en: "IoT" },
-        "device-preview": { zh: "预览版支持", en: "Preview (Beta)" },
-        "device-intro": { zh: "支持 HarmonyOS 的设备型号列表，数据来源于华为开发者网站。", en: "List of devices supporting HarmonyOS, sourced from Huawei's developer website." },
-        "th-api": { zh: "API", en: "API" },
-        "th-version": { zh: "对应系统版本", en: "System Version" },
-        "th-date": { zh: "发布时间", en: "Release Date" },
-        "th-usage": { zh: "使用率", en: "Usage" },
-        "th-android": { zh: "支持的 Android 版本", en: "Android Version" },
-        "th-note": { zh: "备注", en: "Notes" },
-        "th-type": { zh: "类型", en: "Type" },
-        "th-desc": { zh: "说明", en: "Description" },
-        "th-purpose": { zh: "作用", en: "Purpose" },
-    };
 
-    const savedLang = localStorage.getItem("lang") || "zh";
-    document.documentElement.setAttribute("data-lang", savedLang);
-    document.getElementById("lang-toggle").textContent = savedLang === "zh" ? "EN" : "中";
+def get_lang_js():
+    """语言切换 JS：在中/英文内容块之间切换（仅双语版注入）"""
+    return '''<script>
+(function() {
+    const zh = document.getElementById("page-zh");
+    const en = document.getElementById("page-en");
+    const toggle = document.getElementById("lang-toggle");
+    if (!zh || !en || !toggle) return;
 
-    const applyLanguage = (lang) => {
-        document.querySelectorAll("[data-i18n]").forEach(el => {
-            const key = el.getAttribute("data-i18n");
-            if (translations[key] && translations[key][lang]) {
-                el.textContent = translations[key][lang];
-            }
-        });
-        document.getElementById("lang-toggle").textContent = lang === "zh" ? "EN" : "中";
-    };
+    function applyLang(lang) {
+        document.documentElement.setAttribute("data-lang", lang);
+        localStorage.setItem("lang", lang);
+        zh.hidden = lang !== "zh";
+        en.hidden = lang !== "en";
+        toggle.textContent = lang === "zh" ? "EN" : "中";
+        toggle.title = lang === "zh" ? "English" : "中文";
+    }
 
-    applyLanguage(savedLang);
+    applyLang(localStorage.getItem("lang") || "zh");
 
-    document.getElementById("lang-toggle").addEventListener("click", () => {
-        const currentLang = document.documentElement.getAttribute("data-lang");
-        const newLang = currentLang === "zh" ? "en" : "zh";
-        document.documentElement.setAttribute("data-lang", newLang);
-        localStorage.setItem("lang", newLang);
-        applyLanguage(newLang);
+    toggle.addEventListener("click", () => {
+        const cur = document.documentElement.getAttribute("data-lang");
+        applyLang(cur === "zh" ? "en" : "zh");
     });
 })();
 </script>'''
-    if last_updated:
-        js = js.replace('定期更新。', f'定期更新。（最近更新：{last_updated}）', 1)
-        js = js.replace('updated periodically.', f'updated periodically. (Last updated: {last_updated})', 1)
-    return js
 
 
-def get_html_footer():
-    """返回 HTML 页脚"""
+# ============================================================================
+# 内容片段（语言相关，会被翻译）
+# ============================================================================
+
+def get_toc_html():
+    """目录 HTML"""
     return [
+        '<div id="toc">',
+        '<h3>目录</h3>',
+        '<ul>',
+        '<li><a href="#单框架" class="toc-section">单框架</a></li>',
+        '<li><a href="#双框架" class="toc-section">双框架</a></li>',
+        '<li><a href="#版本类型说明" class="toc-section">版本类型说明</a></li>',
+        '<li><a href="#device-手机" class="toc-sub">手机</a></li>',
+        '<li><a href="#device-平板" class="toc-sub">平板</a></li>',
+        '<li><a href="#device-pc" class="toc-sub">PC</a></li>',
+        '<li><a href="#device-穿戴" class="toc-sub">穿戴</a></li>',
+        '<li><a href="#device-iot" class="toc-sub">IoT</a></li>',
+        '<li><a href="#device-预览版支持" class="toc-sub">预览版支持</a></li>',
+        '</ul>',
         '</div>',
-        '</div>',
+    ]
+
+
+def get_footer_content():
+    """页脚内容（container），不含 </body></html>"""
+    return [
         '<div class="container">',
         '<div id="site-footer">',
         '<p>',
@@ -711,18 +650,182 @@ def get_html_footer():
         '</p>',
         '</div>',
         '</div>',
-        '</body>',
-        '</html>',
     ]
 
 
-def generate_html(md_file='hoapi.md', device_file='hodevice.md', html_file='index.html'):
-    """从 MD 文件生成 HTML 文件"""
+def build_content(md_content, device_content, last_updated):
+    """构建页面正文内容（site-title + intro + toc + 表格 + 数据来源 + 页脚）。
+    用 <!--content--> 注释包裹，便于 AI 翻译后整文件提取。不含 head/按钮/JS。"""
+    updated_tag = f'（最近更新：{last_updated}）' if last_updated else ''
+    parts = []
+
+    # 顶部容器：标题 + 简介 + 目录
+    parts.append('<div class="container">')
+    parts.append('<h1 id="site-title"><a href="#">HarmonyOS API Levels</a></h1>')
+    parts.append(
+        f'<p id="intro">这是鸿蒙系统 API 和系统版本映射关系参考表，涵盖单框架与双框架两个技术路线。'
+        f'单框架代表纯鸿蒙架构，双框架则兼容 Android 应用生态。'
+        f'使用率数据来源于华为官方，定期更新。{updated_tag}</p>'
+    )
+    parts.extend(get_toc_html())
+    parts.append('</div>')
+
+    # 内容容器：表格/设备清单/数据来源
+    parts.append('<div class="container">')
+    parts.append('<div id="page-content">')
+    parts.append(render_md(md_content, device_content))
+    parts.append('</div>')
+    parts.append('</div>')
+
+    # 页脚
+    parts.extend(get_footer_content())
+
+    return '\n'.join(parts)
+
+
+# ============================================================================
+# 外壳组装
+# ============================================================================
+
+def wrap_single(content):
+    """单语（中文）完整 HTML 文档：head + theme 按钮/JS + 内容。无语言按钮。"""
+    parts = []
+    parts.extend(get_head())
+    parts.append('<body>')
+    parts.append(get_theme_toggle_button())
+    parts.append(content)
+    parts.append(get_theme_js())
+    parts.append('</body>')
+    parts.append('</html>')
+    return '\n'.join(parts)
+
+
+def wrap_bilingual(zh_content, en_content):
+    """双语完整 HTML 文档：head + theme/lang 按钮/JS + page-zh + page-en(hidden)。"""
+    parts = []
+    parts.extend(get_head())
+    parts.append('<body>')
+    parts.append(get_theme_toggle_button())
+    parts.append(get_lang_toggle_button())
+    parts.append('<div id="page-zh">')
+    parts.append(zh_content)
+    parts.append('</div>')
+    parts.append('<div id="page-en" hidden>')
+    parts.append(en_content)
+    parts.append('</div>')
+    parts.append(get_theme_js())
+    parts.append(get_lang_js())
+    parts.append('</body>')
+    parts.append('</html>')
+    return '\n'.join(parts)
+
+
+# ============================================================================
+# AI 翻译
+# ============================================================================
+
+# 结构性 id（CSS 钩子）——namespace 时不加前缀；浏览器对重复 id 仍应用样式
+STRUCTURAL_IDS = {'site-title', 'intro', 'toc', 'page-content', 'site-footer'}
+
+
+def translate_html_to_english(html_text, base_url, model, api_key):
+    """用 OpenAI 兼容 API 将中文 HTML 整文件翻译为英文，严格保留结构。失败返回 None。"""
+    endpoint = base_url.rstrip('/') + '/chat/completions'
+    system_prompt = (
+        "You are a professional translator. Translate all human-visible Chinese text in the HTML into natural English. "
+        "STRICTLY preserve the entire HTML structure byte-for-byte: every tag, attribute, id, class, inline CSS, "
+        "JavaScript code, and HTML comments (including <!--content--> / <!--/content--> markers) must remain unchanged. "
+        "Do NOT translate or alter URLs, code, version numbers, or brand/model names "
+        "(e.g., HarmonyOS, ArkTS, ArkUI, Mate, nova, Pura, HUAWEI, MatePad, MateBook, WATCH, MateTV). "
+        "Only translate the visible Chinese text content. "
+        "Output the complete HTML document only, with no markdown fences and no explanations."
+    )
+    payload = {
+        "model": model,
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": html_text},
+        ],
+        "temperature": 0.2,
+    }
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+    }
+    max_retries = 3
+    last_err = None
+    for attempt in range(max_retries + 1):
+        try:
+            resp = requests.post(endpoint, json=payload, headers=headers, timeout=600)
+            if resp.status_code == 429 or resp.status_code >= 500:
+                last_err = f"HTTP {resp.status_code}"
+                if attempt < max_retries:
+                    wait = 20 * (attempt + 1)
+                    print(f"⚠️ AI 返回 {resp.status_code}（限流/服务异常），{wait}s 后重试（第 {attempt+1}/{max_retries} 次）...")
+                    time.sleep(wait)
+                    continue
+                break
+            resp.raise_for_status()
+            content = resp.json()['choices'][0]['message']['content'].strip()
+            # 去除可能的 markdown 代码块包裹
+            if content.startswith('```'):
+                content = re.sub(r'^```[a-zA-Z]*\s*', '', content)
+                content = re.sub(r'\s*```$', '', content)
+            return content.strip()
+        except requests.exceptions.Timeout:
+            last_err = "请求超时"
+            if attempt < max_retries:
+                wait = 20 * (attempt + 1)
+                print(f"⚠️ AI 超时，{wait}s 后重试（第 {attempt+1}/{max_retries} 次）...")
+                time.sleep(wait)
+                continue
+            break
+        except Exception as e:
+            print(f"⚠️ AI 翻译失败，将回退到中文单语版：{e}")
+            return None
+    print(f"⚠️ AI 翻译多次失败（{last_err}），将回退到中文单语版")
+    return None
+
+
+def namespace_ids(text, prefix='en-'):
+    """给英文内容中的锚点 id 与对应 href 加前缀，避免与中文块锚点冲突；
+    结构性 id（CSS 钩子）保留。"""
+    def keep(val):
+        return val in STRUCTURAL_IDS
+
+    def id_repl(m):
+        val = m.group(1)
+        return m.group(0) if keep(val) else f'id="{prefix}{val}"'
+
+    def href_repl(m):
+        val = m.group(1)
+        return m.group(0) if keep(val) else f'href="#{prefix}{val}"'
+
+    text = re.sub(r'id="([^"]+)"', id_repl, text)
+    text = re.sub(r'href="#([^"]+)"', href_repl, text)
+    return text
+
+
+def extract_content(full_html):
+    """从完整 HTML 中提取 <!--content-->…<!--/content--> 之间的内容。失败返回 None。"""
+    m = re.search(r'<!--content-->(.*?)<!--/content-->', full_html, re.DOTALL)
+    return m.group(1).strip() if m else None
+
+
+# ============================================================================
+# 主入口
+# ============================================================================
+
+def generate_html(md_file='hoapi.md', device_file='hodevice.md', html_file='index.html',
+                  ai_base_url=None, ai_model=None, api_key=None):
+    """从 MD 文件生成 HTML 文件。
+    AI 配置优先级：入参 > 系统/Shell 环境变量 > .env 文件（AI_BASE_URL / AI_MODEL / AI_API_KEY）。
+    配置齐全时生成双语版（AI 整文件翻译），否则仅中文版。"""
+    load_env()  # 加载脚本同目录的 .env（不覆盖已有环境变量）
     try:
         with open(md_file, 'r', encoding='utf-8') as f:
             md_content = f.read()
 
-        # 读取设备支持清单
         device_content = None
         try:
             with open(device_file, 'r', encoding='utf-8') as f:
@@ -731,12 +834,33 @@ def generate_html(md_file='hoapi.md', device_file='hodevice.md', html_file='inde
             print(f"文件 {device_file} 不存在，跳过设备支持清单")
 
         last_updated = get_last_updated(md_file, device_file)
-        html_content = md_to_html(md_content, device_content, last_updated)
+        zh_content = build_content(md_content, device_content, last_updated)
+
+        # AI 配置：入参优先，回退环境变量
+        base_url = ai_base_url or os.environ.get('AI_BASE_URL')
+        model = ai_model or os.environ.get('AI_MODEL')
+        key = api_key or os.environ.get('AI_API_KEY')
+
+        if base_url and model and key:
+            print("检测到 AI 配置，开始整文件翻译为英文...")
+            # 用 content 标记包裹后交给 AI，便于翻译后整文件提取；最终输出不含这些标记
+            single_for_ai = wrap_single('<!--content-->\n' + zh_content + '\n<!--/content-->')
+            en_full = translate_html_to_english(single_for_ai, base_url, model, key)
+            if en_full:
+                en_content = extract_content(en_full)
+                if en_content:
+                    en_content = namespace_ids(en_content)
+                    with open(html_file, 'w', encoding='utf-8') as f:
+                        f.write(wrap_bilingual(zh_content, en_content))
+                    print(f"已生成 {html_file}（中英双语版）")
+                    return True
+                print("⚠️ 无法从翻译结果中提取内容标记，回退到中文单语版")
+        else:
+            print("未配置 AI（AI_BASE_URL / AI_MODEL / AI_API_KEY），仅生成中文版")
 
         with open(html_file, 'w', encoding='utf-8') as f:
-            f.write(html_content)
-
-        print(f"已生成 {html_file}")
+            f.write(wrap_single(zh_content))
+        print(f"已生成 {html_file}（中文版）")
         return True
 
     except FileNotFoundError:
