@@ -16,15 +16,14 @@ from playwright.sync_api import sync_playwright
 MANUAL_VERSION_DATA = {
     # 单框架 (HarmonyOS NEXT) 版本使用率
     # 与 hoapi.md 保持同步；在线抓取失败时作为回退数据
-    '24': '0.08',   # HarmonyOS 6.1.1
-    '23': '84.94',  # HarmonyOS 6.1.0
-    '22': '12.61',  # HarmonyOS 6.0.2
-    '21': '0.95',   # HarmonyOS 6.0.1
-    '20': '0.27',   # HarmonyOS 6.0.0
-    '19': '0.28',   # HarmonyOS 5.1.1
-    '18': '0.13',   # HarmonyOS 5.1.0
-    '17': '0.54',   # HarmonyOS 5.0.5
-    '16': '0.01',   # HarmonyOS 5.0.4
+    '24': '36.73',  # HarmonyOS 6.1.1
+    '23': '58.87',  # HarmonyOS 6.1.0
+    '22': '2.85',   # HarmonyOS 6.0.2
+    '21': '0.62',   # HarmonyOS 6.0.1
+    '20': '0.06',   # HarmonyOS 6.0.0
+    '19': '0.17',   # HarmonyOS 5.1.1
+    '18': '0.10',   # HarmonyOS 5.1.0
+    '17': '0.36',   # HarmonyOS 5.0.5
     '15': '0',      # HarmonyOS 5.0.3
     '14': '0',      # HarmonyOS 5.0.2
     '13': '0',      # HarmonyOS 5.0.1
@@ -65,27 +64,34 @@ def fetch_version_percentage_online():
         # 查找表格中的版本使用率数据
         version_data = {}
 
-        # 尝试从表格解析
+        # 尝试从表格解析（页面为 3 列：系统版本 | 版本号(API) | 使用率）
         tables = soup.find_all('table')
         for table in tables:
             tbody = table.find('tbody')
             if tbody:
                 rows = tbody.find_all('tr')
                 for row in rows:
-                    cells = row.find_all('td')
-                    if len(cells) >= 2:
-                        # 第一列格式: "6.0.2(22)" - 版本号(API)
-                        version_cell = cells[0].get_text(strip=True)
-                        # 从括号中提取API版本号
-                        api_match = re.search(r'\((\d+)\)', version_cell)
-                        if api_match:
-                            api = api_match.group(1)
-
-                            # 第二列是使用率百分比
-                            pct_cell = cells[1].get_text(strip=True)
-                            pct_match = re.match(r'(\d+(?:\.\d+)?)\s*%?', pct_cell)
-                            if pct_match:
-                                version_data[api] = pct_match.group(1)
+                    cells = [c.get_text(strip=True) for c in row.find_all('td')]
+                    if len(cells) < 2:
+                        continue
+                    # 找含 "(API)" 的单元格作为版本列（位置不固定，稳健处理）
+                    api = None
+                    version_idx = None
+                    for idx, c in enumerate(cells):
+                        m = re.search(r'\((\d+)\)', c)
+                        if m:
+                            api = m.group(1)
+                            version_idx = idx
+                            break
+                    if api is None:
+                        continue  # 预览版行（如 26.0.0 Beta1）无 API 号，跳过
+                    # 使用率：版本列之后第一个含 % 的单元格
+                    for c in cells[version_idx + 1:]:
+                        if '%' in c:
+                            pm = re.match(r'(\d+(?:\.\d+)?)', c)
+                            if pm:
+                                version_data[api] = pm.group(1)
+                            break
 
         if version_data:
             print(f"成功获取 {len(version_data)} 条在线数据")
