@@ -5,10 +5,29 @@ HarmonyOS 支持设备型号清单爬取脚本
 """
 
 import re
+import shutil
 from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright
 from collections import defaultdict
 from datetime import datetime
+
+
+def launch_chromium(p):
+    """启动浏览器：依次尝试 Playwright 自带 Chromium -> 系统 Chrome -> 系统 Chromium。
+    避免 Playwright 内置浏览器未安装时直接失败。"""
+    attempts = [
+        {},  # Playwright 自带 Chromium
+        {'channel': 'chrome'},  # 系统 Google Chrome
+    ]
+    system_chromium = shutil.which('chromium')
+    if system_chromium:
+        attempts.append({'executable_path': system_chromium})  # 系统 Chromium（如 Debian/Kali）
+    for kwargs in attempts:
+        try:
+            return p.chromium.launch(headless=True, **kwargs)
+        except Exception:
+            continue
+    raise RuntimeError('无法启动 Chromium/Chrome：请安装 Playwright 内置浏览器（playwright install chromium）或系统 Chrome/Chromium')
 
 
 def fetch_device_data():
@@ -17,11 +36,7 @@ def fetch_device_data():
 
     print("正在加载页面...")
     with sync_playwright() as p:
-        try:
-            browser = p.chromium.launch(headless=True)
-        except Exception:
-            # Playwright 自带 Chromium 未安装时，回退到系统 Chrome
-            browser = p.chromium.launch(channel='chrome', headless=True)
+        browser = launch_chromium(p)
         page = browser.new_page()
 
         # 使用 domcontentloaded 而不是 networkidle，更快加载

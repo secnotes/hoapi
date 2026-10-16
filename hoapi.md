@@ -2,15 +2,16 @@
 
 | API | 对应系统版本 | 发布时间 | 使用率 | 备注 |
 |-----|-------------|---------|--------|------|
-| [24](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-611) | HarmonyOS 6.1.1 | 2026-05-26 | 36.73% | 开发者工具链升级、AI 影像增强、跨设备协同优化及安全能力深化，普通端侧体验以相机智能追踪、AI 字幕定制、卡证识别扩展及系统流畅度提升为主 |
-| [23](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-610) | HarmonyOS 6.1.0 | 2026-04-20 | 58.87% | 悬浮导航、沉浸光感 |
-| [22](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-602) | HarmonyOS 6.0.2 | 2026-01-21 | 2.85% | 开发者工具链与底层能力增强，新增超 50 项特性，聚焦 ArkUI 组件灵活性、跨端协同、安全隐私及算法加速，普通端侧主要为 Bug 修复 |
-| [21](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-601) | HarmonyOS 6.0.1 | 2025-11-20 | 0.62% | ArkUI 组件增强、后台任务多实例支持、地图/相机/语音服务细化及基础信息暴露，主要面向开发者能力补充而非终端用户大功能更新 |
-| [20](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-600) | HarmonyOS 6.0.0 | 2025-09-25 | 0.06% | **全栈自研纯血架构（取消 NEXT 后缀）**、‌AI 智能体主动服务、‌空间化沉浸交互及‌跨生态无界互联 |
-| [19](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-511-beta1) | HarmonyOS 5.1.1 | 2025-06-30 | 0.17% | ArkUI 交互增强、地图服务升级、性能分析深化及多模态能力拓展，主要面向开发者提供精细化控件与底层工具链支持 |
-| [18](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-510) | HarmonyOS 5.1.0 | 2025-06-11 | 0.10% | **首次原生支持智能穿戴开发**‌、‌**实况窗交互革命升级**‌、‌**AI 能力深度整合**‌及‌**底层框架与 ArkUI 组件增强**‌。‌‌ |
-| [17](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-505-release) | HarmonyOS 5.0.5 | 2025-05-14 | 0.36% | 窗口化场景精细管控‌、‌ArkUI 交互增强‌及‌多媒体/安全能力扩展‌ |
-| [16](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-504) | HarmonyOS 5.0.4 | 2025-03-29 | - | **HarmonyOS NEXT 里程碑：纯单框架，完全移除 AOSP，基于 OpenHarmony L0-L2** |
+| 26 | HarmonyOS 7.0.0 | 待补充 | 18.98% | ⚠️ 待补充：新增版本行，请核对版本名并补充发布时间/链接/说明 |
+| [24](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-611) | HarmonyOS 6.1.1 | 2026-05-26 | 75.02% | 开发者工具链升级、AI 影像增强、跨设备协同优化及安全能力深化，普通端侧体验以相机智能追踪、AI 字幕定制、卡证识别扩展及系统流畅度提升为主 |
+| [23](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-610) | HarmonyOS 6.1.0 | 2026-04-20 | 4.11% | 悬浮导航、沉浸光感 |
+| [22](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-602) | HarmonyOS 6.0.2 | 2026-01-21 | 1.27% | 开发者工具链与底层能力增强，新增超 50 项特性，聚焦 ArkUI 组件灵活性、跨端协同、安全隐私及算法加速，普通端侧主要为 Bug 修复 |
+| [21](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-601) | HarmonyOS 6.0.1 | 2025-11-20 | 0.33% | ArkUI 组件增强、后台任务多实例支持、地图/相机/语音服务细化及基础信息暴露，主要面向开发者能力补充而非终端用户大功能更新 |
+| [20](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-600) | HarmonyOS 6.0.0 | 2025-09-25 | 0.02% | **全栈自研纯血架构（取消 NEXT 后缀）**、‌AI 智能体主动服务、‌空间化沉浸交互及‌跨生态无界互联 |
+| [19](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-511-beta1) | HarmonyOS 5.1.1 | 2025-06-30 | 0.07% | ArkUI 交互增强、地图服务升级、性能分析深化及多模态能力拓展，主要面向开发者提供精细化控件与底层工具链支持 |
+| [18](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-510) | HarmonyOS 5.1.0 | 2025-06-11 | 0.04% | **首次原生支持智能穿戴开发**‌、‌**实况窗交互革命升级**‌、‌**AI 能力深度整合**‌及‌**底层框架与 ArkUI 组件增强**‌。‌‌ |
+| [17](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-505-release) | HarmonyOS 5.0.5 | 2025-05-14 | 0.16% | 窗口化场景精细管控‌、‌ArkUI 交互增强‌及‌多媒体/安全能力扩展‌ |
+| [16](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-504) | HarmonyOS 5.0.4 | 2025-03-29 | 0% | **HarmonyOS NEXT 里程碑：纯单框架，完全移除 AOSP，基于 OpenHarmony L0-L2** |
 | [15](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-503) | HarmonyOS 5.0.3 | 2025-03-15 | 0% | Ability Kit 增强、UX 样式更新、开发工具变更 |
 | [14](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-502-release) | HarmonyOS 5.0.2 | 2025-01-27 | 0% | 键盘 avoidance 模式支持光标避让、多项优化与修复 |
 | [13](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-501) | HarmonyOS 5.0.1 | 2024-11-30 | 0% | 稳定性增强与 C API 补全版本‌，无颠覆性终端功能新增，主要面向开发者完善接口能力并修复平台行为 |

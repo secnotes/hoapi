@@ -27,8 +27,9 @@ def main():
 
     if version_data:
         print(f"\n获取到的版本数据:")
-        for api, pct in sorted(version_data.items(), key=lambda x: int(x[0]), reverse=True):
-            print(f"  API {api}: {pct}%")
+        for api, info in sorted(version_data.items(), key=lambda x: int(x[0]), reverse=True):
+            ver = f"（{info.get('version')}）" if info.get('version') else ''
+            print(f"  API {api}: {info['usage']}%{ver}")
 
     print("\n[步骤2] 更新 hoapi.md 文件...")
     update_md_file(version_data)
