@@ -2,7 +2,7 @@
 
 | API | 对应系统版本 | 发布时间 | 使用率 | 备注 |
 |-----|-------------|---------|--------|------|
-| 26 | HarmonyOS 7.0.0 | 待补充 | 18.98% | ⚠️ 待补充：新增版本行，请核对版本名并补充发布时间/链接/说明 |
+| [26](https://developer.huawei.com/consumer/cn/doc/doccenter-release-notes/overview-2600) | HarmonyOS 7.0.0 | 2026-08-29 | 18.98% | 进一步增强了组件的材质效果，实现更好的沉浸光感效果，该版本对HarmonyOS开发套件的版本号格式进行了调整 |
 | [24](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-611) | HarmonyOS 6.1.1 | 2026-05-26 | 75.02% | 开发者工具链升级、AI 影像增强、跨设备协同优化及安全能力深化，普通端侧体验以相机智能追踪、AI 字幕定制、卡证识别扩展及系统流畅度提升为主 |
 | [23](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-610) | HarmonyOS 6.1.0 | 2026-04-20 | 4.11% | 悬浮导航、沉浸光感 |
 | [22](https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-602) | HarmonyOS 6.0.2 | 2026-01-21 | 1.27% | 开发者工具链与底层能力增强，新增超 50 项特性，聚焦 ArkUI 组件灵活性、跨端协同、安全隐私及算法加速，普通端侧主要为 Bug 修复 |

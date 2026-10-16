@@ -62,4 +62,4 @@ python3 ho_html_gen.py
 
 ## License
 
-MIT
+[MIT](LICENSE) © 2026 Yansong Li (secnotes)
