@@ -178,6 +178,7 @@ def render_md(md_content, device_content):
 
     html_parts = []
     in_table = False
+    table_has_notes = False  # 当前表格末列是否为备注列（用于移动端加宽 + 横向滚动）
     current_section = ''
     current_api = None
     source_links = []
@@ -213,8 +214,12 @@ def render_md(md_content, device_content):
                 html_parts.append('<div class="table-responsive">')
                 html_parts.append('<table>')
                 in_table = True
+                table_has_notes = False
 
             is_header = cells[0] in ['API', 'Version', '类型'] if cells else False
+            # 单框架/双框架表（API 列开头）末列为备注；版本类型说明等小表不加宽
+            if is_header:
+                table_has_notes = cells[0] == 'API'
             row_parts = ['<thead><tr>'] if is_header else ['<tr>']
 
             # 提取当前行 API 数字
@@ -298,7 +303,10 @@ def render_md(md_content, device_content):
                         row_parts.append(f'<td>{cell_processed}</td>')
                 else:
                     tag = 'th' if is_header else 'td'
-                    row_parts.append(f'<{tag}>{cell_processed}</{tag}>')
+                    if table_has_notes and i == len(cells) - 1:
+                        row_parts.append(f'<{tag} class="notes">{cell_processed}</{tag}>')
+                    else:
+                        row_parts.append(f'<{tag}>{cell_processed}</{tag}>')
 
             row_parts.append('</tr>')
             if is_header:
@@ -495,6 +503,8 @@ def get_head():
         '#toc a:hover { text-decoration: underline; }',
         '#toc .toc-section { font-weight: 600; }',
         '#toc .toc-sub { color: var(--text-secondary); font-weight: 400; }',
+        # 折叠箭头仅移动端显示（见下方媒体查询），桌面端目录始终展开
+        '.toc-chevron { display: none; }',
 
         # 移动端响应式样式
         '@media (max-width: 768px) {',
@@ -512,9 +522,17 @@ def get_head():
         '    th:nth-child(3), td:nth-child(3) { min-width: 5rem; }',
         '    th:nth-child(4), td:nth-child(4) { min-width: 4rem; }',
         '    th:last-child, td:last-child { min-width: 6rem; }',
+        # 备注列加宽（仅单框架/双框架表），长备注少折行、行高变矮；整表横向滚动查看
+        '    th.notes, td.notes { min-width: 18rem; }',
         '    #toc { padding: 0.75rem 1rem; margin-bottom: 1rem; }',
         '    #toc ul { gap: 0.25rem 1rem; }',
         '    #toc a { font-size: 0.85rem; }',
+        # 目录默认折叠，点击标题展开/收起（配合 get_toc_js）
+        '    #toc h3 { cursor: pointer; }',
+        '    #toc.collapsed ul { display: none; }',
+        '    .toc-chevron { display: inline-block; width: 0.85em; height: 0.85em; margin-left: 0.4rem; vertical-align: -0.08em; fill: none; stroke: var(--text-secondary); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.25s ease; }',
+        '    #toc.collapsed .toc-chevron { transform: rotate(-90deg); }',
+        '    #toc h3:hover .toc-chevron { stroke: var(--link-color); }',
         '    .beta, .stable, .paren, .milestone { font-size: 0.65rem; padding: 0.15rem 0.3rem; }',
         '    #site-footer { margin-top: 30px; padding: 20px 15px; }',
         '    .source-links a { margin-right: 0.75rem; font-size: 0.85rem; }',
@@ -608,6 +626,42 @@ def get_lang_js():
 </script>'''
 
 
+def get_toc_js():
+    """目录折叠 JS：移动端默认折叠，点击/键盘切换标题展开收起。
+    中英两个内容块各有一个 #toc（结构性 id 未做前缀隔离），统一处理。"""
+    return '''<script>
+(function() {
+    var mq = window.matchMedia("(max-width: 768px)");
+    document.querySelectorAll("#toc").forEach(function(toc) {
+        var h3 = toc.querySelector("h3");
+        if (!h3) return;
+        var sync = function() {
+            // 桌面端始终展开；移动端默认折叠（用户手动展开过后不再强制收起）
+            if (!mq.matches || toc.dataset.opened) {
+                toc.classList.remove("collapsed");
+                h3.setAttribute("aria-expanded", "true");
+            } else {
+                toc.classList.add("collapsed");
+                h3.setAttribute("aria-expanded", "false");
+            }
+        };
+        var toggle = function() {
+            toc.classList.toggle("collapsed");
+            var collapsed = toc.classList.contains("collapsed");
+            if (!collapsed) toc.dataset.opened = "1";
+            h3.setAttribute("aria-expanded", collapsed ? "false" : "true");
+        };
+        h3.addEventListener("click", toggle);
+        h3.addEventListener("keydown", function(e) {
+            if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); }
+        });
+        sync();
+        if (mq.addEventListener) mq.addEventListener("change", sync);
+    });
+})();
+</script>'''
+
+
 # ============================================================================
 # 内容片段（语言相关，会被翻译）
 # ============================================================================
@@ -616,7 +670,7 @@ def get_toc_html():
     """目录 HTML"""
     return [
         '<div id="toc">',
-        '<h3>目录</h3>',
+        '<h3 role="button" tabindex="0" aria-expanded="true">目录<svg class="toc-chevron" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></h3>',
         '<ul>',
         '<li><a href="#单框架" class="toc-section">单框架</a></li>',
         '<li><a href="#双框架" class="toc-section">双框架</a></li>',
@@ -695,6 +749,7 @@ def wrap_single(content):
     parts.append(get_theme_toggle_button())
     parts.append(content)
     parts.append(get_theme_js())
+    parts.append(get_toc_js())
     parts.append('</body>')
     parts.append('</html>')
     return '\n'.join(parts)
@@ -714,6 +769,7 @@ def wrap_bilingual(zh_content, en_content):
     parts.append(en_content)
     parts.append('</div>')
     parts.append(get_theme_js())
+    parts.append(get_toc_js())
     parts.append(get_lang_js())
     parts.append('</body>')
     parts.append('</html>')

@@ -127,6 +127,7 @@ table a:hover { text-decoration: underline; }
 #toc a:hover { text-decoration: underline; }
 #toc .toc-section { font-weight: 600; }
 #toc .toc-sub { color: var(--text-secondary); font-weight: 400; }
+.toc-chevron { display: none; }
 @media (max-width: 768px) {
     html { font-size: 14px; }
     .container { padding: 0 1rem; }
@@ -142,9 +143,15 @@ table a:hover { text-decoration: underline; }
     th:nth-child(3), td:nth-child(3) { min-width: 5rem; }
     th:nth-child(4), td:nth-child(4) { min-width: 4rem; }
     th:last-child, td:last-child { min-width: 6rem; }
+    th.notes, td.notes { min-width: 18rem; }
     #toc { padding: 0.75rem 1rem; margin-bottom: 1rem; }
     #toc ul { gap: 0.25rem 1rem; }
     #toc a { font-size: 0.85rem; }
+    #toc h3 { cursor: pointer; }
+    #toc.collapsed ul { display: none; }
+    .toc-chevron { display: inline-block; width: 0.85em; height: 0.85em; margin-left: 0.4rem; vertical-align: -0.08em; fill: none; stroke: var(--text-secondary); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.25s ease; }
+    #toc.collapsed .toc-chevron { transform: rotate(-90deg); }
+    #toc h3:hover .toc-chevron { stroke: var(--link-color); }
     .beta, .stable, .paren, .milestone { font-size: 0.65rem; padding: 0.15rem 0.3rem; }
     #site-footer { margin-top: 30px; padding: 20px 15px; }
     .source-links a { margin-right: 0.75rem; font-size: 0.85rem; }
@@ -167,7 +174,7 @@ table a:hover { text-decoration: underline; }
 <h1 id="site-title"><a href="#">HarmonyOS API Levels</a></h1>
 <p id="intro">这是鸿蒙系统 API 和系统版本映射关系参考表，涵盖单框架与双框架两个技术路线。单框架代表纯鸿蒙架构，双框架则兼容 Android 应用生态。使用率数据来源于华为官方，定期更新。（最近更新：2026-10-16）</p>
 <div id="toc">
-<h3>目录</h3>
+<h3 role="button" tabindex="0" aria-expanded="true">目录<svg class="toc-chevron" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></h3>
 <ul>
 <li><a href="#单框架" class="toc-section">单框架</a></li>
 <li><a href="#双框架" class="toc-section">双框架</a></li>
@@ -186,53 +193,53 @@ table a:hover { text-decoration: underline; }
 <h2 id="单框架">单框架</h2>
 <div class="table-responsive">
 <table>
-<thead><tr><th>API</th><th>对应系统版本</th><th>发布时间</th><th>使用率</th><th>备注</th></tr></thead><tbody>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/doccenter-release-notes/overview-2600" target="_blank" rel="noopener">26</a></td><td><b>HarmonyOS 7.0.0</b> <sup class="beta">NEW</sup></td><td>2026-08-29</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 18.98%, var(--usage-bar-end) 18.98%);">18.98%</td><td>进一步增强了组件的材质效果，实现更好的沉浸光感效果，该版本对HarmonyOS开发套件的版本号格式进行了调整</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-611" target="_blank" rel="noopener">24</a></td><td><b>HarmonyOS 6.1.1</b></td><td>2026-05-26</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 75.02%, var(--usage-bar-end) 75.02%);">75.02%</td><td>开发者工具链升级、AI 影像增强、跨设备协同优化及安全能力深化，普通端侧体验以相机智能追踪、AI 字幕定制、卡证识别扩展及系统流畅度提升为主</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-610" target="_blank" rel="noopener">23</a></td><td><b>HarmonyOS 6.1.0</b></td><td>2026-04-20</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 4.11%, var(--usage-bar-end) 4.11%);">4.11%</td><td>悬浮导航、沉浸光感</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-602" target="_blank" rel="noopener">22</a></td><td><b>HarmonyOS 6.0.2</b></td><td>2026-01-21</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 1.27%, var(--usage-bar-end) 1.27%);">1.27%</td><td>开发者工具链与底层能力增强，新增超 50 项特性，聚焦 ArkUI 组件灵活性、跨端协同、安全隐私及算法加速，普通端侧主要为 Bug 修复</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-601" target="_blank" rel="noopener">21</a></td><td><b>HarmonyOS 6.0.1</b></td><td>2025-11-20</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.33%, var(--usage-bar-end) 0.33%);">0.33%</td><td>ArkUI 组件增强、后台任务多实例支持、地图/相机/语音服务细化及基础信息暴露，主要面向开发者能力补充而非终端用户大功能更新</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-600" target="_blank" rel="noopener">20</a></td><td><b>HarmonyOS 6.0.0</b> <sup class="milestone">里程碑</sup></td><td>2025-09-25</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.02%, var(--usage-bar-end) 0.02%);">0.02%</td><td><strong>全栈自研纯血架构（取消 NEXT 后缀）</strong>、‌AI 智能体主动服务、‌空间化沉浸交互及‌跨生态无界互联</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-511-beta1" target="_blank" rel="noopener">19</a></td><td><b>HarmonyOS 5.1.1</b></td><td>2025-06-30</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.07%, var(--usage-bar-end) 0.07%);">0.07%</td><td>ArkUI 交互增强、地图服务升级、性能分析深化及多模态能力拓展，主要面向开发者提供精细化控件与底层工具链支持</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-510" target="_blank" rel="noopener">18</a></td><td><b>HarmonyOS 5.1.0</b> <sup class="milestone">里程碑</sup></td><td>2025-06-11</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.04%, var(--usage-bar-end) 0.04%);">0.04%</td><td><strong>首次原生支持智能穿戴开发</strong>‌、‌<strong>实况窗交互革命升级</strong>‌、‌<strong>AI 能力深度整合</strong>‌及‌<strong>底层框架与 ArkUI 组件增强</strong>‌。‌‌</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-505-release" target="_blank" rel="noopener">17</a></td><td><b>HarmonyOS 5.0.5</b></td><td>2025-05-14</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.16%, var(--usage-bar-end) 0.16%);">0.16%</td><td>窗口化场景精细管控‌、‌ArkUI 交互增强‌及‌多媒体/安全能力扩展‌</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-504" target="_blank" rel="noopener">16</a></td><td><b>HarmonyOS 5.0.4</b> <sup class="milestone">里程碑</sup></td><td>2025-03-29</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.0%, var(--usage-bar-end) 0.0%);">0.0%</td><td><strong>HarmonyOS NEXT 里程碑：纯单框架，完全移除 AOSP，基于 OpenHarmony L0-L2</strong></td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-503" target="_blank" rel="noopener">15</a></td><td><b>HarmonyOS 5.0.3</b></td><td>2025-03-15</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.0%, var(--usage-bar-end) 0.0%);">0.0%</td><td>Ability Kit 增强、UX 样式更新、开发工具变更</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-502-release" target="_blank" rel="noopener">14</a></td><td><b>HarmonyOS 5.0.2</b></td><td>2025-01-27</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.0%, var(--usage-bar-end) 0.0%);">0.0%</td><td>键盘 avoidance 模式支持光标避让、多项优化与修复</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-501" target="_blank" rel="noopener">13</a></td><td><b>HarmonyOS 5.0.1</b></td><td>2024-11-30</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.0%, var(--usage-bar-end) 0.0%);">0.0%</td><td>稳定性增强与 C API 补全版本‌，无颠覆性终端功能新增，主要面向开发者完善接口能力并修复平台行为</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-500" target="_blank" rel="noopener">12</a></td><td><b>HarmonyOS 5.0.0</b> <sup class="milestone">里程碑</sup></td><td>2024-10-22</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.0%, var(--usage-bar-end) 0.0%);">0.0%</td><td><strong>NEXT Public Beta / Commercial：消费者公测及商用发布，正式命名为 HarmonyOS 5。纯鸿蒙里程碑。正式确立 ArkTS 声明式开发范式，彻底转向原生架构。</strong></td></tr>
-<tr><td>12</td><td><b>HarmonyOS 5/NEXT</b> <sup class="beta">LITE</sup> <sup class="paren">WEARABLE</sup></td><td>2024-09-19</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.0%, var(--usage-bar-end) 0.0%);">0.0%</td><td>可穿戴设备专用，基于 LiteOS 内核的轻量版</td></tr>
-<tr><td>12</td><td><b>NEXT</b> <sup class="beta">DEVELOPER BETA 1</sup></td><td>2024-06-21</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.0%, var(--usage-bar-end) 0.0%);">0.0%</td><td>首个公开开发者测试版，&quot;全场景&quot;智能系统</td></tr>
-<tr><td>11</td><td><b>NEXT</b> <sup class="beta">DEVELOPER PREVIEW 1</sup> <sup class="paren">CANARY</sup></td><td>2024-01-18</td><td>-</td><td>新增大量 ArkTS API，扩展分布式硬件支持</td></tr>
-<tr><td>10</td><td><b>NEXT</b> <sup class="beta">DEVELOPER PREVIEW 1</sup></td><td>2023-10-26</td><td>-</td><td>新增 PC/平板模式支持，基于 OpenHarmony 4.0</td></tr>
-<tr><td>9</td><td><b>NEXT</b> <sup class="beta">DEVELOPER PREVIEW 1</sup> <sup class="paren">INTERNAL</sup></td><td>2023-08-04</td><td>-</td><td>内部开发者预览，基于 OpenHarmony 3.2</td></tr>
+<thead><tr><th>API</th><th>对应系统版本</th><th>发布时间</th><th>使用率</th><th class="notes">备注</th></tr></thead><tbody>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/doccenter-release-notes/overview-2600" target="_blank" rel="noopener">26</a></td><td><b>HarmonyOS 7.0.0</b> <sup class="beta">NEW</sup></td><td>2026-08-29</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 18.98%, var(--usage-bar-end) 18.98%);">18.98%</td><td class="notes">进一步增强了组件的材质效果，实现更好的沉浸光感效果，该版本对HarmonyOS开发套件的版本号格式进行了调整</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-611" target="_blank" rel="noopener">24</a></td><td><b>HarmonyOS 6.1.1</b></td><td>2026-05-26</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 75.02%, var(--usage-bar-end) 75.02%);">75.02%</td><td class="notes">开发者工具链升级、AI 影像增强、跨设备协同优化及安全能力深化，普通端侧体验以相机智能追踪、AI 字幕定制、卡证识别扩展及系统流畅度提升为主</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-610" target="_blank" rel="noopener">23</a></td><td><b>HarmonyOS 6.1.0</b></td><td>2026-04-20</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 4.11%, var(--usage-bar-end) 4.11%);">4.11%</td><td class="notes">悬浮导航、沉浸光感</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-602" target="_blank" rel="noopener">22</a></td><td><b>HarmonyOS 6.0.2</b></td><td>2026-01-21</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 1.27%, var(--usage-bar-end) 1.27%);">1.27%</td><td class="notes">开发者工具链与底层能力增强，新增超 50 项特性，聚焦 ArkUI 组件灵活性、跨端协同、安全隐私及算法加速，普通端侧主要为 Bug 修复</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-601" target="_blank" rel="noopener">21</a></td><td><b>HarmonyOS 6.0.1</b></td><td>2025-11-20</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.33%, var(--usage-bar-end) 0.33%);">0.33%</td><td class="notes">ArkUI 组件增强、后台任务多实例支持、地图/相机/语音服务细化及基础信息暴露，主要面向开发者能力补充而非终端用户大功能更新</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-600" target="_blank" rel="noopener">20</a></td><td><b>HarmonyOS 6.0.0</b> <sup class="milestone">里程碑</sup></td><td>2025-09-25</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.02%, var(--usage-bar-end) 0.02%);">0.02%</td><td class="notes"><strong>全栈自研纯血架构（取消 NEXT 后缀）</strong>、‌AI 智能体主动服务、‌空间化沉浸交互及‌跨生态无界互联</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-511-beta1" target="_blank" rel="noopener">19</a></td><td><b>HarmonyOS 5.1.1</b></td><td>2025-06-30</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.07%, var(--usage-bar-end) 0.07%);">0.07%</td><td class="notes">ArkUI 交互增强、地图服务升级、性能分析深化及多模态能力拓展，主要面向开发者提供精细化控件与底层工具链支持</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-510" target="_blank" rel="noopener">18</a></td><td><b>HarmonyOS 5.1.0</b> <sup class="milestone">里程碑</sup></td><td>2025-06-11</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.04%, var(--usage-bar-end) 0.04%);">0.04%</td><td class="notes"><strong>首次原生支持智能穿戴开发</strong>‌、‌<strong>实况窗交互革命升级</strong>‌、‌<strong>AI 能力深度整合</strong>‌及‌<strong>底层框架与 ArkUI 组件增强</strong>‌。‌‌</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-505-release" target="_blank" rel="noopener">17</a></td><td><b>HarmonyOS 5.0.5</b></td><td>2025-05-14</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.16%, var(--usage-bar-end) 0.16%);">0.16%</td><td class="notes">窗口化场景精细管控‌、‌ArkUI 交互增强‌及‌多媒体/安全能力扩展‌</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-504" target="_blank" rel="noopener">16</a></td><td><b>HarmonyOS 5.0.4</b> <sup class="milestone">里程碑</sup></td><td>2025-03-29</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.0%, var(--usage-bar-end) 0.0%);">0.0%</td><td class="notes"><strong>HarmonyOS NEXT 里程碑：纯单框架，完全移除 AOSP，基于 OpenHarmony L0-L2</strong></td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-503" target="_blank" rel="noopener">15</a></td><td><b>HarmonyOS 5.0.3</b></td><td>2025-03-15</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.0%, var(--usage-bar-end) 0.0%);">0.0%</td><td class="notes">Ability Kit 增强、UX 样式更新、开发工具变更</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-502-release" target="_blank" rel="noopener">14</a></td><td><b>HarmonyOS 5.0.2</b></td><td>2025-01-27</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.0%, var(--usage-bar-end) 0.0%);">0.0%</td><td class="notes">键盘 avoidance 模式支持光标避让、多项优化与修复</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-501" target="_blank" rel="noopener">13</a></td><td><b>HarmonyOS 5.0.1</b></td><td>2024-11-30</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.0%, var(--usage-bar-end) 0.0%);">0.0%</td><td class="notes">稳定性增强与 C API 补全版本‌，无颠覆性终端功能新增，主要面向开发者完善接口能力并修复平台行为</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-500" target="_blank" rel="noopener">12</a></td><td><b>HarmonyOS 5.0.0</b> <sup class="milestone">里程碑</sup></td><td>2024-10-22</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.0%, var(--usage-bar-end) 0.0%);">0.0%</td><td class="notes"><strong>NEXT Public Beta / Commercial：消费者公测及商用发布，正式命名为 HarmonyOS 5。纯鸿蒙里程碑。正式确立 ArkTS 声明式开发范式，彻底转向原生架构。</strong></td></tr>
+<tr><td>12</td><td><b>HarmonyOS 5/NEXT</b> <sup class="beta">LITE</sup> <sup class="paren">WEARABLE</sup></td><td>2024-09-19</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.0%, var(--usage-bar-end) 0.0%);">0.0%</td><td class="notes">可穿戴设备专用，基于 LiteOS 内核的轻量版</td></tr>
+<tr><td>12</td><td><b>NEXT</b> <sup class="beta">DEVELOPER BETA 1</sup></td><td>2024-06-21</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.0%, var(--usage-bar-end) 0.0%);">0.0%</td><td class="notes">首个公开开发者测试版，&quot;全场景&quot;智能系统</td></tr>
+<tr><td>11</td><td><b>NEXT</b> <sup class="beta">DEVELOPER PREVIEW 1</sup> <sup class="paren">CANARY</sup></td><td>2024-01-18</td><td>-</td><td class="notes">新增大量 ArkTS API，扩展分布式硬件支持</td></tr>
+<tr><td>10</td><td><b>NEXT</b> <sup class="beta">DEVELOPER PREVIEW 1</sup></td><td>2023-10-26</td><td>-</td><td class="notes">新增 PC/平板模式支持，基于 OpenHarmony 4.0</td></tr>
+<tr><td>9</td><td><b>NEXT</b> <sup class="beta">DEVELOPER PREVIEW 1</sup> <sup class="paren">INTERNAL</sup></td><td>2023-08-04</td><td>-</td><td class="notes">内部开发者预览，基于 OpenHarmony 3.2</td></tr>
 </tbody>
 </table>
 </div>
 <h2 id="双框架">双框架</h2>
 <div class="table-responsive">
 <table>
-<thead><tr><th>API</th><th>对应系统版本</th><th>发布时间</th><th>支持的 Android 版本</th><th>备注</th></tr></thead><tbody>
-<tr><td>-</td><td><b>HarmonyOS 4.5</b> <sup class="paren">TV</sup></td><td>2024-09-24</td><td>Android 12</td><td>仅用于 Vision TV 系列智能电视</td></tr>
-<tr><td>-</td><td><b>HarmonyOS 4.3.1</b></td><td>2025-07-10</td><td>Android 12</td><td>持续支持中，最后的双框架 LTS 版本（EMUI 15 同源）</td></tr>
-<tr><td>-</td><td><b>HarmonyOS 4.3.0</b></td><td>2024-11-26</td><td>Android 12</td><td>Mate 70系列及Mate X6非先锋版SKU于2024年11月26日在中国上市</td></tr>
-<tr><td>10</td><td><b>HarmonyOS 4.2.0</b></td><td>2024-04-26</td><td>Android 11/12</td><td>Pura 70系列旗舰机型开箱即搭载HarmonyOS 4.2增量升级</td></tr>
-<tr><td>10</td><td><b>HarmonyOS 4.0.0</b></td><td>2023-08-18</td><td>Android 10/11/12</td><td>更高级的API级功能集、提升系统动画流畅度的改进以及用户界面的视觉优化</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_1_202305-0000001582097989-V2" target="_blank" rel="noopener">9</a></td><td><b>HarmonyOS 3.1</b></td><td>2023-05-15</td><td>Android 9/10/11/12</td><td>针对高通骁龙芯片优化，系统动画流畅度提升</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_1_202303-0000001553985573-V2" target="_blank" rel="noopener">9</a></td><td><b>HarmonyOS 3.1</b> <sup class="beta">BETA2</sup></td><td>2023-04-19</td><td>Android 9/10/11/12</td><td>部分接口新增或变更</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_202302-0000001499901657-V2" target="_blank" rel="noopener">9</a></td><td><b>HarmonyOS 3.1</b> <sup class="beta">BETA1</sup></td><td>2023-02-16</td><td>Android 9/10/11/12</td><td>部分接口新增或变更，以支持接口错误码</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_202211-0000001384974906-V2" target="_blank" rel="noopener">8</a></td><td><b>HarmonyOS 3.1</b> <sup class="beta">DEVELOPER PREVIEW</sup> <sup class="milestone">里程碑</sup></td><td>2022-11-04</td><td>Android 9/10/11/12</td><td><strong>全新推出应用开发Stage模型</strong></td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_202209-0000001323985308-V2" target="_blank" rel="noopener">8</a></td><td><b>HarmonyOS 3.0.0</b> <sup class="milestone">里程碑</sup></td><td>2022-09-06</td><td>Android 9/10/11/12</td><td><strong>引入声明式编程 (ArkTS)，增强超级设备互联互通；停止支持 Java 语言</strong></td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_202206-0000001273887550-V2" target="_blank" rel="noopener">7</a></td><td><b>HarmonyOS 3.0</b> <sup class="beta">BETA</sup></td><td>2022-07-06</td><td>Android 9/10/11/12</td><td>本次发布HarmonyOS 3.0 Beta，可用于开发基于API Version 8的应用</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_202202-0000001193097180-V2" target="_blank" rel="noopener">7</a></td><td><b>HarmonyOS 3.0</b> <sup class="beta">PREVIEW 2</sup></td><td>2022-02-26</td><td>Android 9/10/11/12</td><td>新增两个TS的文本输入组件</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_202110-0000001167203136-V2" target="_blank" rel="noopener">7</a></td><td><b>HarmonyOS 3.0</b> <sup class="beta">PREVIEW</sup></td><td>2021-10-22</td><td>Android 9/10/11/12</td><td>JS UI正式命名为ArkUI</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_2_20210915-0000001153993146-V2" target="_blank" rel="noopener">6</a></td><td><b>HarmonyOS 2.2.0.3</b></td><td>2021-09-15</td><td>Android 9/10/11</td><td>混合双框架（Linux+AOSP），首次引入 HAP 应用格式，支持手机/平板/穿戴设备</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_2_20210625-0000001123724872-V2" target="_blank" rel="noopener">6</a></td><td><b>HarmonyOS 2.2.0.1</b> <sup class="beta">BETA</sup></td><td>2021-06-25</td><td>Android 9/10/11</td><td>本次发布HarmonyOS SDK 2.2 Beta 1</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_2_202104-0000001104117222-V2" target="_blank" rel="noopener">5</a></td><td><b>HarmonyOS 2.1.1.20</b></td><td>2021-04-30</td><td>Android 9/10/11</td><td>本次发布HarmonyOS SDK 2.1 Release，较前一版本在接口内容上无新增和变更</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_2_202103-0000001139956937-V2" target="_blank" rel="noopener">5</a></td><td><b>HarmonyOS 2.x</b> <sup class="beta">BETA</sup></td><td>2021-03-21</td><td>Android 9/10</td><td>分布式和基础能力增强</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_2_202012-0000001139855219-V2" target="_blank" rel="noopener">4</a></td><td><b>HarmonyOS 2.x</b> <sup class="beta">BETA</sup></td><td>2020-12-16</td><td>Android 9/10</td><td>在前一版本基础上，更新对手机的支持，提供给开发者进行手机设备Beta</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_2_202009-0000001093177566-V2" target="_blank" rel="noopener">3</a></td><td><b>HarmonyOS 2.0.0</b> <sup class="beta">BETA</sup></td><td>2020-09-11</td><td>Android 9/10</td><td>HarmonyOS 2.0首个Beta版本，支持更多的设备品类，包括华为智慧屏、智能穿戴、车机设备基于HarmonyOS进行开发者beta</td></tr>
-<tr><td>5</td><td><b>HarmonyOS 1.0.0</b> <sup class="paren">TV</sup></td><td>2019-08-09</td><td>Android 9</td><td>首代版本，基于 LiteOS+Linux 内核+AOSP 兼容层，仅用于智能电视和 IoT 设备</td></tr>
+<thead><tr><th>API</th><th>对应系统版本</th><th>发布时间</th><th>支持的 Android 版本</th><th class="notes">备注</th></tr></thead><tbody>
+<tr><td>-</td><td><b>HarmonyOS 4.5</b> <sup class="paren">TV</sup></td><td>2024-09-24</td><td>Android 12</td><td class="notes">仅用于 Vision TV 系列智能电视</td></tr>
+<tr><td>-</td><td><b>HarmonyOS 4.3.1</b></td><td>2025-07-10</td><td>Android 12</td><td class="notes">持续支持中，最后的双框架 LTS 版本（EMUI 15 同源）</td></tr>
+<tr><td>-</td><td><b>HarmonyOS 4.3.0</b></td><td>2024-11-26</td><td>Android 12</td><td class="notes">Mate 70系列及Mate X6非先锋版SKU于2024年11月26日在中国上市</td></tr>
+<tr><td>10</td><td><b>HarmonyOS 4.2.0</b></td><td>2024-04-26</td><td>Android 11/12</td><td class="notes">Pura 70系列旗舰机型开箱即搭载HarmonyOS 4.2增量升级</td></tr>
+<tr><td>10</td><td><b>HarmonyOS 4.0.0</b></td><td>2023-08-18</td><td>Android 10/11/12</td><td class="notes">更高级的API级功能集、提升系统动画流畅度的改进以及用户界面的视觉优化</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_1_202305-0000001582097989-V2" target="_blank" rel="noopener">9</a></td><td><b>HarmonyOS 3.1</b></td><td>2023-05-15</td><td>Android 9/10/11/12</td><td class="notes">针对高通骁龙芯片优化，系统动画流畅度提升</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_1_202303-0000001553985573-V2" target="_blank" rel="noopener">9</a></td><td><b>HarmonyOS 3.1</b> <sup class="beta">BETA2</sup></td><td>2023-04-19</td><td>Android 9/10/11/12</td><td class="notes">部分接口新增或变更</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_202302-0000001499901657-V2" target="_blank" rel="noopener">9</a></td><td><b>HarmonyOS 3.1</b> <sup class="beta">BETA1</sup></td><td>2023-02-16</td><td>Android 9/10/11/12</td><td class="notes">部分接口新增或变更，以支持接口错误码</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_202211-0000001384974906-V2" target="_blank" rel="noopener">8</a></td><td><b>HarmonyOS 3.1</b> <sup class="beta">DEVELOPER PREVIEW</sup> <sup class="milestone">里程碑</sup></td><td>2022-11-04</td><td>Android 9/10/11/12</td><td class="notes"><strong>全新推出应用开发Stage模型</strong></td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_202209-0000001323985308-V2" target="_blank" rel="noopener">8</a></td><td><b>HarmonyOS 3.0.0</b> <sup class="milestone">里程碑</sup></td><td>2022-09-06</td><td>Android 9/10/11/12</td><td class="notes"><strong>引入声明式编程 (ArkTS)，增强超级设备互联互通；停止支持 Java 语言</strong></td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_202206-0000001273887550-V2" target="_blank" rel="noopener">7</a></td><td><b>HarmonyOS 3.0</b> <sup class="beta">BETA</sup></td><td>2022-07-06</td><td>Android 9/10/11/12</td><td class="notes">本次发布HarmonyOS 3.0 Beta，可用于开发基于API Version 8的应用</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_202202-0000001193097180-V2" target="_blank" rel="noopener">7</a></td><td><b>HarmonyOS 3.0</b> <sup class="beta">PREVIEW 2</sup></td><td>2022-02-26</td><td>Android 9/10/11/12</td><td class="notes">新增两个TS的文本输入组件</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_202110-0000001167203136-V2" target="_blank" rel="noopener">7</a></td><td><b>HarmonyOS 3.0</b> <sup class="beta">PREVIEW</sup></td><td>2021-10-22</td><td>Android 9/10/11/12</td><td class="notes">JS UI正式命名为ArkUI</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_2_20210915-0000001153993146-V2" target="_blank" rel="noopener">6</a></td><td><b>HarmonyOS 2.2.0.3</b></td><td>2021-09-15</td><td>Android 9/10/11</td><td class="notes">混合双框架（Linux+AOSP），首次引入 HAP 应用格式，支持手机/平板/穿戴设备</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_2_20210625-0000001123724872-V2" target="_blank" rel="noopener">6</a></td><td><b>HarmonyOS 2.2.0.1</b> <sup class="beta">BETA</sup></td><td>2021-06-25</td><td>Android 9/10/11</td><td class="notes">本次发布HarmonyOS SDK 2.2 Beta 1</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_2_202104-0000001104117222-V2" target="_blank" rel="noopener">5</a></td><td><b>HarmonyOS 2.1.1.20</b></td><td>2021-04-30</td><td>Android 9/10/11</td><td class="notes">本次发布HarmonyOS SDK 2.1 Release，较前一版本在接口内容上无新增和变更</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_2_202103-0000001139956937-V2" target="_blank" rel="noopener">5</a></td><td><b>HarmonyOS 2.x</b> <sup class="beta">BETA</sup></td><td>2021-03-21</td><td>Android 9/10</td><td class="notes">分布式和基础能力增强</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_2_202012-0000001139855219-V2" target="_blank" rel="noopener">4</a></td><td><b>HarmonyOS 2.x</b> <sup class="beta">BETA</sup></td><td>2020-12-16</td><td>Android 9/10</td><td class="notes">在前一版本基础上，更新对手机的支持，提供给开发者进行手机设备Beta</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_2_202009-0000001093177566-V2" target="_blank" rel="noopener">3</a></td><td><b>HarmonyOS 2.0.0</b> <sup class="beta">BETA</sup></td><td>2020-09-11</td><td>Android 9/10</td><td class="notes">HarmonyOS 2.0首个Beta版本，支持更多的设备品类，包括华为智慧屏、智能穿戴、车机设备基于HarmonyOS进行开发者beta</td></tr>
+<tr><td>5</td><td><b>HarmonyOS 1.0.0</b> <sup class="paren">TV</sup></td><td>2019-08-09</td><td>Android 9</td><td class="notes">首代版本，基于 LiteOS+Linux 内核+AOSP 兼容层，仅用于智能电视和 IoT 设备</td></tr>
 </tbody>
 </table>
 </div>
@@ -428,16 +435,16 @@ Inspired by <a href="https://apilevels.com/" target="_blank">Android API Levels<
 <div id="page-en" hidden>
 <div class="container">
 <h1 id="site-title"><a href="#">HarmonyOS API Levels</a></h1>
-<p id="intro">This reference table maps HarmonyOS APIs to system versions, covering both single-framework and dual-framework architectures. The single framework represents a pure HarmonyOS architecture, while the dual framework maintains compatibility with the Android app ecosystem. Usage statistics are sourced from Huawei and updated regularly. (Last updated: 2026-10-16)</p>
+<p id="intro">This is a reference table mapping HarmonyOS APIs to system versions, covering two technical architectures: single-framework and dual-framework. The single-framework represents the pure HarmonyOS architecture, while the dual-framework maintains compatibility with the Android app ecosystem. Usage statistics are sourced from Huawei official data and updated regularly. (Last updated: 2026-10-16)</p>
 <div id="toc">
-<h3>Table of Contents</h3>
+<h3 role="button" tabindex="0" aria-expanded="true">Table of Contents<svg class="toc-chevron" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></h3>
 <ul>
 <li><a href="#en-单框架" class="toc-section">Single Framework</a></li>
 <li><a href="#en-双框架" class="toc-section">Dual Framework</a></li>
-<li><a href="#en-版本类型说明" class="toc-section">Version Type Descriptions</a></li>
-<li><a href="#en-device-手机" class="toc-sub">Smartphones</a></li>
+<li><a href="#en-版本类型说明" class="toc-section">Version Type Description</a></li>
+<li><a href="#en-device-手机" class="toc-sub">Phones</a></li>
 <li><a href="#en-device-平板" class="toc-sub">Tablets</a></li>
-<li><a href="#en-device-pc" class="toc-sub">PCs</a></li>
+<li><a href="#en-device-pc" class="toc-sub">PC</a></li>
 <li><a href="#en-device-穿戴" class="toc-sub">Wearables</a></li>
 <li><a href="#en-device-iot" class="toc-sub">IoT</a></li>
 <li><a href="#en-device-预览版支持" class="toc-sub">Preview Support</a></li>
@@ -449,68 +456,68 @@ Inspired by <a href="https://apilevels.com/" target="_blank">Android API Levels<
 <h2 id="en-单框架">Single Framework</h2>
 <div class="table-responsive">
 <table>
-<thead><tr><th>API</th><th>Corresponding System Version</th><th>Release Date</th><th>Usage Rate</th><th>Notes</th></tr></thead><tbody>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/doccenter-release-notes/overview-2600" target="_blank" rel="noopener">26</a></td><td><b>HarmonyOS 7.0.0</b> <sup class="beta">NEW</sup></td><td>2026-08-29</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 18.98%, var(--usage-bar-end) 18.98%);">18.98%</td><td>Further enhanced component material effects for improved immersive light perception; adjusted the version number format for the HarmonyOS development kit.</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-611" target="_blank" rel="noopener">24</a></td><td><b>HarmonyOS 6.1.1</b></td><td>2026-05-26</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 75.02%, var(--usage-bar-end) 75.02%);">75.02%</td><td>Upgraded developer toolchain, AI photography enhancements, cross-device collaboration optimization, and deepened security capabilities. Standard user experience focuses on smart camera tracking, customizable AI subtitles, expanded ID/card recognition, and improved system fluidity.</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-610" target="_blank" rel="noopener">23</a></td><td><b>HarmonyOS 6.1.0</b></td><td>2026-04-20</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 4.11%, var(--usage-bar-end) 4.11%);">4.11%</td><td>Floating navigation, immersive light perception.</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-602" target="_blank" rel="noopener">22</a></td><td><b>HarmonyOS 6.0.2</b></td><td>2026-01-21</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 1.27%, var(--usage-bar-end) 1.27%);">1.27%</td><td>Enhanced developer toolchain and underlying capabilities with over 50 new features focusing on ArkUI component flexibility, cross-end collaboration, security & privacy, and algorithm acceleration. Standard user updates primarily consist of bug fixes.</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-601" target="_blank" rel="noopener">21</a></td><td><b>HarmonyOS 6.0.1</b></td><td>2025-11-20</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.33%, var(--usage-bar-end) 0.33%);">0.33%</td><td>Enhanced ArkUI components, multi-instance background task support, refined map/camera/voice services, and exposed basic information. Primarily aimed at supplementing developer capabilities rather than major feature updates for end users.</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-600" target="_blank" rel="noopener">20</a></td><td><b>HarmonyOS 6.0.0</b> <sup class="milestone">Milestone</sup></td><td>2025-09-25</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.02%, var(--usage-bar-end) 0.02%);">0.02%</td><td><strong>Fully self-developed native architecture (NEXT suffix removed)</strong>, proactive AI agent services, spatial immersive interaction, and boundless cross-ecosystem connectivity.</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-511-beta1" target="_blank" rel="noopener">19</a></td><td><b>HarmonyOS 5.1.1</b></td><td>2025-06-30</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.07%, var(--usage-bar-end) 0.07%);">0.07%</td><td>Enhanced ArkUI interactions, upgraded map services, deepened performance analysis, and expanded multimodal capabilities. Primarily provides fine-grained controls and underlying toolchain support for developers.</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-510" target="_blank" rel="noopener">18</a></td><td><b>HarmonyOS 5.1.0</b> <sup class="milestone">Milestone</sup></td><td>2025-06-11</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.04%, var(--usage-bar-end) 0.04%);">0.04%</td><td><strong>First native support for smart wearable development</strong>, revolutionary upgrade to Live View interactions, deep integration of AI capabilities, and enhancements to the underlying framework and ArkUI components.</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-505-release" target="_blank" rel="noopener">17</a></td><td><b>HarmonyOS 5.0.5</b></td><td>2025-05-14</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.16%, var(--usage-bar-end) 0.16%);">0.16%</td><td>Fine-grained control of windowed scenarios, enhanced ArkUI interactions, and expanded multimedia/security capabilities.</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-504" target="_blank" rel="noopener">16</a></td><td><b>HarmonyOS 5.0.4</b> <sup class="milestone">Milestone</sup></td><td>2025-03-29</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.0%, var(--usage-bar-end) 0.0%);">0.0%</td><td><strong>HarmonyOS NEXT Milestone: Pure single framework, completely removes AOSP, based on OpenHarmony L0-L2</strong></td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-503" target="_blank" rel="noopener">15</a></td><td><b>HarmonyOS 5.0.3</b></td><td>2025-03-15</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.0%, var(--usage-bar-end) 0.0%);">0.0%</td><td>Enhanced Ability Kit, UX style updates, and developer tool changes.</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-502-release" target="_blank" rel="noopener">14</a></td><td><b>HarmonyOS 5.0.2</b></td><td>2025-01-27</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.0%, var(--usage-bar-end) 0.0%);">0.0%</td><td>Keyboard avoidance mode supports cursor offset, along with multiple optimizations and fixes.</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-501" target="_blank" rel="noopener">13</a></td><td><b>HarmonyOS 5.0.1</b></td><td>2024-11-30</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.0%, var(--usage-bar-end) 0.0%);">0.0%</td><td>Stability enhancements and C API completion version. No disruptive terminal features added; primarily aims to refine interface capabilities for developers and fix platform behaviors.</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-500" target="_blank" rel="noopener">12</a></td><td><b>HarmonyOS 5.0.0</b> <sup class="milestone">Milestone</sup></td><td>2024-10-22</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.0%, var(--usage-bar-end) 0.0%);">0.0%</td><td><strong>NEXT Public Beta / Commercial: Consumer public beta and commercial release, officially named HarmonyOS 5. Pure HarmonyOS milestone. Formally establishes the ArkTS declarative development paradigm, making a complete shift to a native architecture.</strong></td></tr>
-<tr><td>12</td><td><b>HarmonyOS 5/NEXT</b> <sup class="beta">LITE</sup> <sup class="paren">WEARABLE</sup></td><td>2024-09-19</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.0%, var(--usage-bar-end) 0.0%);">0.0%</td><td>Dedicated for wearables, lightweight version based on LiteOS kernel.</td></tr>
-<tr><td>12</td><td><b>NEXT</b> <sup class="beta">DEVELOPER BETA 1</sup></td><td>2024-06-21</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.0%, var(--usage-bar-end) 0.0%);">0.0%</td><td>First public developer test version, "all-scenario" intelligent system.</td></tr>
-<tr><td>11</td><td><b>NEXT</b> <sup class="beta">DEVELOPER PREVIEW 1</sup> <sup class="paren">CANARY</sup></td><td>2024-01-18</td><td>-</td><td>Added numerous ArkTS APIs, expanded distributed hardware support.</td></tr>
-<tr><td>10</td><td><b>NEXT</b> <sup class="beta">DEVELOPER PREVIEW 1</sup></td><td>2023-10-26</td><td>-</td><td>Added PC/tablet mode support, based on OpenHarmony 4.0.</td></tr>
-<tr><td>9</td><td><b>NEXT</b> <sup class="beta">DEVELOPER PREVIEW 1</sup> <sup class="paren">INTERNAL</sup></td><td>2023-08-04</td><td>-</td><td>Internal developer preview, based on OpenHarmony 3.2.</td></tr>
+<thead><tr><th>API</th><th>Corresponding System Version</th><th>Release Date</th><th>Usage Rate</th><th class="notes">Notes</th></tr></thead><tbody>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/doccenter-release-notes/overview-2600" target="_blank" rel="noopener">26</a></td><td><b>HarmonyOS 7.0.0</b> <sup class="beta">NEW</sup></td><td>2026-08-29</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 18.98%, var(--usage-bar-end) 18.98%);">18.98%</td><td class="notes">Further enhanced component material effects for better immersive light perception; this version adjusts the version number format for the HarmonyOS development kit.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-611" target="_blank" rel="noopener">24</a></td><td><b>HarmonyOS 6.1.1</b></td><td>2026-05-26</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 75.02%, var(--usage-bar-end) 75.02%);">75.02%</td><td class="notes">Upgraded developer toolchain, AI image enhancement, cross-device collaboration optimization, and deepened security capabilities. Standard device experiences focus on smart camera tracking, customizable AI subtitles, expanded card/document recognition, and improved system fluidity.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-610" target="_blank" rel="noopener">23</a></td><td><b>HarmonyOS 6.1.0</b></td><td>2026-04-20</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 4.11%, var(--usage-bar-end) 4.11%);">4.11%</td><td class="notes">Floating navigation, immersive light perception.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-602" target="_blank" rel="noopener">22</a></td><td><b>HarmonyOS 6.0.2</b></td><td>2026-01-21</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 1.27%, var(--usage-bar-end) 1.27%);">1.27%</td><td class="notes">Enhanced developer toolchain and underlying capabilities, adding over 50 new features focusing on ArkUI component flexibility, cross-end collaboration, security & privacy, and algorithm acceleration. Standard device updates mainly consist of bug fixes.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-601" target="_blank" rel="noopener">21</a></td><td><b>HarmonyOS 6.0.1</b></td><td>2025-11-20</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.33%, var(--usage-bar-end) 0.33%);">0.33%</td><td class="notes">Enhanced ArkUI components, multi-instance background task support, refined map/camera/voice services, and exposed basic information. Primarily aimed at supplementing developer capabilities rather than major feature updates for end users.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-600" target="_blank" rel="noopener">20</a></td><td><b>HarmonyOS 6.0.0</b> <sup class="milestone">Milestone</sup></td><td>2025-09-25</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.02%, var(--usage-bar-end) 0.02%);">0.02%</td><td class="notes"><strong>Fully self-developed native architecture (NEXT suffix removed), proactive AI agent services, spatial immersive interaction, and boundless cross-ecosystem connectivity.</strong></td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-511-beta1" target="_blank" rel="noopener">19</a></td><td><b>HarmonyOS 5.1.1</b></td><td>2025-06-30</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.07%, var(--usage-bar-end) 0.07%);">0.07%</td><td class="notes">Enhanced ArkUI interactions, map service upgrades, deeper performance analysis, and expanded multimodal capabilities, primarily providing developers with fine-grained controls and underlying toolchain support.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-510" target="_blank" rel="noopener">18</a></td><td><b>HarmonyOS 5.1.0</b> <sup class="milestone">Milestone</sup></td><td>2025-06-11</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.04%, var(--usage-bar-end) 0.04%);">0.04%</td><td class="notes"><strong>First native support for smart wearable development, revolutionary upgrade to Live Window interaction, deep integration of AI capabilities, and enhancements to the underlying framework and ArkUI components.</strong></td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-505-release" target="_blank" rel="noopener">17</a></td><td><b>HarmonyOS 5.0.5</b></td><td>2025-05-14</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.16%, var(--usage-bar-end) 0.16%);">0.16%</td><td class="notes">Fine-grained control of windowed scenarios, enhanced ArkUI interactions, and extended multimedia/security capabilities.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-504" target="_blank" rel="noopener">16</a></td><td><b>HarmonyOS 5.0.4</b> <sup class="milestone">Milestone</sup></td><td>2025-03-29</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.0%, var(--usage-bar-end) 0.0%);">0.0%</td><td class="notes"><strong>HarmonyOS NEXT Milestone: Pure single-framework, completely removes AOSP, based on OpenHarmony L0-L2.</strong></td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-503" target="_blank" rel="noopener">15</a></td><td><b>HarmonyOS 5.0.3</b></td><td>2025-03-15</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.0%, var(--usage-bar-end) 0.0%);">0.0%</td><td class="notes">Enhanced Ability Kit, UX style updates, and development tool changes.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-502-release" target="_blank" rel="noopener">14</a></td><td><b>HarmonyOS 5.0.2</b></td><td>2025-01-27</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.0%, var(--usage-bar-end) 0.0%);">0.0%</td><td class="notes">Keyboard avoidance mode supports cursor offset, along with multiple optimizations and fixes.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-501" target="_blank" rel="noopener">13</a></td><td><b>HarmonyOS 5.0.1</b></td><td>2024-11-30</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.0%, var(--usage-bar-end) 0.0%);">0.0%</td><td class="notes">Stability enhancement and C API completion version. No disruptive terminal features added; primarily aimed at developers to refine interface capabilities and fix platform behaviors.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/overview-500" target="_blank" rel="noopener">12</a></td><td><b>HarmonyOS 5.0.0</b> <sup class="milestone">Milestone</sup></td><td>2024-10-22</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.0%, var(--usage-bar-end) 0.0%);">0.0%</td><td class="notes"><strong>NEXT Public Beta / Commercial: Consumer public beta and commercial release, officially named HarmonyOS 5. Pure HarmonyOS milestone. Formally establishes the ArkTS declarative development paradigm, making a complete shift to a native architecture.</strong></td></tr>
+<tr><td>12</td><td><b>HarmonyOS 5/NEXT</b> <sup class="beta">LITE</sup> <sup class="paren">WEARABLE</sup></td><td>2024-09-19</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.0%, var(--usage-bar-end) 0.0%);">0.0%</td><td class="notes">Dedicated for wearable devices, lightweight version based on LiteOS kernel.</td></tr>
+<tr><td>12</td><td><b>NEXT</b> <sup class="beta">DEVELOPER BETA 1</sup></td><td>2024-06-21</td><td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) 0.0%, var(--usage-bar-end) 0.0%);">0.0%</td><td class="notes">First public developer test version, "all-scenario" intelligent system.</td></tr>
+<tr><td>11</td><td><b>NEXT</b> <sup class="beta">DEVELOPER PREVIEW 1</sup> <sup class="paren">CANARY</sup></td><td>2024-01-18</td><td>-</td><td class="notes">Adds numerous ArkTS APIs, extends distributed hardware support.</td></tr>
+<tr><td>10</td><td><b>NEXT</b> <sup class="beta">DEVELOPER PREVIEW 1</sup></td><td>2023-10-26</td><td>-</td><td class="notes">Adds PC/Tablet mode support, based on OpenHarmony 4.0.</td></tr>
+<tr><td>9</td><td><b>NEXT</b> <sup class="beta">DEVELOPER PREVIEW 1</sup> <sup class="paren">INTERNAL</sup></td><td>2023-08-04</td><td>-</td><td class="notes">Internal developer preview, based on OpenHarmony 3.2.</td></tr>
 </tbody>
 </table>
 </div>
 <h2 id="en-双框架">Dual Framework</h2>
 <div class="table-responsive">
 <table>
-<thead><tr><th>API</th><th>Corresponding System Version</th><th>Release Date</th><th>Supported Android Version</th><th>Notes</th></tr></thead><tbody>
-<tr><td>-</td><td><b>HarmonyOS 4.5</b> <sup class="paren">TV</sup></td><td>2024-09-24</td><td>Android 12</td><td>Exclusively for Vision TV series smart TVs.</td></tr>
-<tr><td>-</td><td><b>HarmonyOS 4.3.1</b></td><td>2025-07-10</td><td>Android 12</td><td>Under continuous support, final dual-framework LTS version (same lineage as EMUI 15).</td></tr>
-<tr><td>-</td><td><b>HarmonyOS 4.3.0</b></td><td>2024-11-26</td><td>Android 12</td><td>Mate 70 series and non-vanguard SKU of Mate X6 launched in China on November 26, 2024.</td></tr>
-<tr><td>10</td><td><b>HarmonyOS 4.2.0</b></td><td>2024-04-26</td><td>Android 11/12</td><td>Pura 70 series flagship models ship with incremental HarmonyOS 4.2 upgrade out of the box.</td></tr>
-<tr><td>10</td><td><b>HarmonyOS 4.0.0</b></td><td>2023-08-18</td><td>Android 10/11/12</td><td>More advanced API-level feature set, improvements to system animation fluidity, and visual optimization of the user interface.</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_1_202305-0000001582097989-V2" target="_blank" rel="noopener">9</a></td><td><b>HarmonyOS 3.1</b></td><td>2023-05-15</td><td>Android 9/10/11/12</td><td>Optimized for Qualcomm Snapdragon chips, with improved system animation fluidity.</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_1_202303-0000001553985573-V2" target="_blank" rel="noopener">9</a></td><td><b>HarmonyOS 3.1</b> <sup class="beta">BETA2</sup></td><td>2023-04-19</td><td>Android 9/10/11/12</td><td>Some interfaces added or modified.</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_202302-0000001499901657-V2" target="_blank" rel="noopener">9</a></td><td><b>HarmonyOS 3.1</b> <sup class="beta">BETA1</sup></td><td>2023-02-16</td><td>Android 9/10/11/12</td><td>Some interfaces added or modified to support interface error codes.</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_202211-0000001384974906-V2" target="_blank" rel="noopener">8</a></td><td><b>HarmonyOS 3.1</b> <sup class="beta">DEVELOPER PREVIEW</sup> <sup class="milestone">Milestone</sup></td><td>2022-11-04</td><td>Android 9/10/11/12</td><td><strong>Newly introduced Stage model for application development</strong>.</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_202209-0000001323985308-V2" target="_blank" rel="noopener">8</a></td><td><b>HarmonyOS 3.0.0</b> <sup class="milestone">Milestone</sup></td><td>2022-09-06</td><td>Android 9/10/11/12</td><td><strong>Introduced declarative programming (ArkTS), enhanced super device interconnectivity; discontinued support for Java language.</strong></td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_202206-0000001273887550-V2" target="_blank" rel="noopener">7</a></td><td><b>HarmonyOS 3.0</b> <sup class="beta">BETA</sup></td><td>2022-07-06</td><td>Android 9/10/11/12</td><td>Released HarmonyOS 3.0 Beta, usable for developing applications based on API Version 8.</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_202202-0000001193097180-V2" target="_blank" rel="noopener">7</a></td><td><b>HarmonyOS 3.0</b> <sup class="beta">PREVIEW 2</sup></td><td>2022-02-26</td><td>Android 9/10/11/12</td><td>Added two TS text input components.</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_202110-0000001167203136-V2" target="_blank" rel="noopener">7</a></td><td><b>HarmonyOS 3.0</b> <sup class="beta">PREVIEW</sup></td><td>2021-10-22</td><td>Android 9/10/11/12</td><td>JS UI officially renamed to ArkUI.</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_2_20210915-0000001153993146-V2" target="_blank" rel="noopener">6</a></td><td><b>HarmonyOS 2.2.0.3</b></td><td>2021-09-15</td><td>Android 9/10/11</td><td>Hybrid dual framework (Linux+AOSP), first introduction of HAP application format, supports smartphones/tablets/wearables.</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_2_20210625-0000001123724872-V2" target="_blank" rel="noopener">6</a></td><td><b>HarmonyOS 2.2.0.1</b> <sup class="beta">BETA</sup></td><td>2021-06-25</td><td>Android 9/10/11</td><td>Released HarmonyOS SDK 2.2 Beta 1.</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_2_202104-0000001104117222-V2" target="_blank" rel="noopener">5</a></td><td><b>HarmonyOS 2.1.1.20</b></td><td>2021-04-30</td><td>Android 9/10/11</td><td>Released HarmonyOS SDK 2.1 Release, with no additions or modifications to interface content compared to the previous version.</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_2_202103-0000001139956937-V2" target="_blank" rel="noopener">5</a></td><td><b>HarmonyOS 2.x</b> <sup class="beta">BETA</sup></td><td>2021-03-21</td><td>Android 9/10</td><td>Enhanced distributed and basic capabilities.</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_2_202012-0000001139855219-V2" target="_blank" rel="noopener">4</a></td><td><b>HarmonyOS 2.x</b> <sup class="beta">BETA</sup></td><td>2020-12-16</td><td>Android 9/10</td><td>Building on the previous version, updated smartphone support provided to developers for smartphone device beta testing.</td></tr>
-<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_2_202009-0000001093177566-V2" target="_blank" rel="noopener">3</a></td><td><b>HarmonyOS 2.0.0</b> <sup class="beta">BETA</sup></td><td>2020-09-11</td><td>Android 9/10</td><td>First HarmonyOS 2.0 Beta version, supporting more device categories including Huawei Smart Screen, smart wearables, and automotive devices for developer beta testing based on HarmonyOS.</td></tr>
-<tr><td>5</td><td><b>HarmonyOS 1.0.0</b> <sup class="paren">TV</sup></td><td>2019-08-09</td><td>Android 9</td><td>First generation version, based on LiteOS+Linux kernel + AOSP compatibility layer, exclusively for smart TVs and IoT devices.</td></tr>
+<thead><tr><th>API</th><th>Corresponding System Version</th><th>Release Date</th><th>Supported Android Version</th><th class="notes">Notes</th></tr></thead><tbody>
+<tr><td>-</td><td><b>HarmonyOS 4.5</b> <sup class="paren">TV</sup></td><td>2024-09-24</td><td>Android 12</td><td class="notes">Only for Vision TV series smart TVs.</td></tr>
+<tr><td>-</td><td><b>HarmonyOS 4.3.1</b></td><td>2025-07-10</td><td>Android 12</td><td class="notes">Continuously supported, last dual-framework LTS version (same lineage as EMUI 15).</td></tr>
+<tr><td>-</td><td><b>HarmonyOS 4.3.0</b></td><td>2024-11-26</td><td>Android 12</td><td class="notes">Mate 70 series and non-vanguard edition SKUs of Mate X6 launched in China on November 26, 2024.</td></tr>
+<tr><td>10</td><td><b>HarmonyOS 4.2.0</b></td><td>2024-04-26</td><td>Android 11/12</td><td class="notes">Pura 70 series flagship models ship with incremental upgrade to HarmonyOS 4.2 out of the box.</td></tr>
+<tr><td>10</td><td><b>HarmonyOS 4.0.0</b></td><td>2023-08-18</td><td>Android 10/11/12</td><td class="notes">More advanced API-level feature set, improvements to system animation fluidity, and visual optimization of the user interface.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_1_202305-0000001582097989-V2" target="_blank" rel="noopener">9</a></td><td><b>HarmonyOS 3.1</b></td><td>2023-05-15</td><td>Android 9/10/11/12</td><td class="notes">Optimized for Qualcomm Snapdragon chips, improved system animation fluidity.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_1_202303-0000001553985573-V2" target="_blank" rel="noopener">9</a></td><td><b>HarmonyOS 3.1</b> <sup class="beta">BETA2</sup></td><td>2023-04-19</td><td>Android 9/10/11/12</td><td class="notes">Some interfaces added or changed.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_202302-0000001499901657-V2" target="_blank" rel="noopener">9</a></td><td><b>HarmonyOS 3.1</b> <sup class="beta">BETA1</sup></td><td>2023-02-16</td><td>Android 9/10/11/12</td><td class="notes">Some interfaces added or changed to support interface error codes.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_202211-0000001384974906-V2" target="_blank" rel="noopener">8</a></td><td><b>HarmonyOS 3.1</b> <sup class="beta">DEVELOPER PREVIEW</sup> <sup class="milestone">Milestone</sup></td><td>2022-11-04</td><td>Android 9/10/11/12</td><td class="notes"><strong>Newly introduced Stage model for application development.</strong></td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_202209-0000001323985308-V2" target="_blank" rel="noopener">8</a></td><td><b>HarmonyOS 3.0.0</b> <sup class="milestone">Milestone</sup></td><td>2022-09-06</td><td>Android 9/10/11/12</td><td class="notes"><strong>Introduces declarative programming (ArkTS), enhances super device interconnectivity; stops supporting Java language.</strong></td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_202206-0000001273887550-V2" target="_blank" rel="noopener">7</a></td><td><b>HarmonyOS 3.0</b> <sup class="beta">BETA</sup></td><td>2022-07-06</td><td>Android 9/10/11/12</td><td class="notes">This release is HarmonyOS 3.0 Beta, usable for developing applications based on API Version 8.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_202202-0000001193097180-V2" target="_blank" rel="noopener">7</a></td><td><b>HarmonyOS 3.0</b> <sup class="beta">PREVIEW 2</sup></td><td>2022-02-26</td><td>Android 9/10/11/12</td><td class="notes">Adds two TS text input components.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_3_202110-0000001167203136-V2" target="_blank" rel="noopener">7</a></td><td><b>HarmonyOS 3.0</b> <sup class="beta">PREVIEW</sup></td><td>2021-10-22</td><td>Android 9/10/11/12</td><td class="notes">JS UI officially renamed to ArkUI.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_2_20210915-0000001153993146-V2" target="_blank" rel="noopener">6</a></td><td><b>HarmonyOS 2.2.0.3</b></td><td>2021-09-15</td><td>Android 9/10/11</td><td class="notes">Hybrid dual-framework (Linux+AOSP), first introduction of HAP application format, supports phones/tablets/wearables.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_2_20210625-0000001123724872-V2" target="_blank" rel="noopener">6</a></td><td><b>HarmonyOS 2.2.0.1</b> <sup class="beta">BETA</sup></td><td>2021-06-25</td><td>Android 9/10/11</td><td class="notes">This release is HarmonyOS SDK 2.2 Beta 1.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_2_202104-0000001104117222-V2" target="_blank" rel="noopener">5</a></td><td><b>HarmonyOS 2.1.1.20</b></td><td>2021-04-30</td><td>Android 9/10/11</td><td class="notes">This release is HarmonyOS SDK 2.1 Release, with no additions or changes to interface content compared to the previous version.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_2_202103-0000001139956937-V2" target="_blank" rel="noopener">5</a></td><td><b>HarmonyOS 2.x</b> <sup class="beta">BETA</sup></td><td>2021-03-21</td><td>Android 9/10</td><td class="notes">Enhanced distributed and basic capabilities.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_2_202012-0000001139855219-V2" target="_blank" rel="noopener">4</a></td><td><b>HarmonyOS 2.x</b> <sup class="beta">BETA</sup></td><td>2020-12-16</td><td>Android 9/10</td><td class="notes">Based on the previous version, updates phone support, provided to developers for mobile device beta testing.</td></tr>
+<tr><td><a href="https://developer.huawei.com/consumer/cn/doc/harmonyos-releases-V2/harmonyos_release_2_202009-0000001093177566-V2" target="_blank" rel="noopener">3</a></td><td><b>HarmonyOS 2.0.0</b> <sup class="beta">BETA</sup></td><td>2020-09-11</td><td>Android 9/10</td><td class="notes">First Beta version of HarmonyOS 2.0, supports more device categories, including Huawei Smart Screen, smart wearables, and vehicle devices conducting developer beta based on HarmonyOS.</td></tr>
+<tr><td>5</td><td><b>HarmonyOS 1.0.0</b> <sup class="paren">TV</sup></td><td>2019-08-09</td><td>Android 9</td><td class="notes">First generation version, based on LiteOS+Linux kernel + AOSP compatibility layer, only for smart TVs and IoT devices.</td></tr>
 </tbody>
 </table>
 </div>
-<h2 id="en-版本类型说明">Version Type Descriptions</h2>
+<h2 id="en-版本类型说明">Version Type Description</h2>
 <div class="table-responsive">
 <table>
 <thead><tr><th>Type</th><th>Description</th><th>Purpose</th></tr></thead><tbody>
-<tr><td>Canary</td><td>Early access version, feature functions pending stabilization.</td><td>Report issues, Huawei will resolve them fully.</td></tr>
-<tr><td>Beta</td><td>Publicly released Beta version, feature functions pending stabilization.</td><td>Provide usage feedback to improve the product.</td></tr>
-<tr><td>Release</td><td>Officially released version, quality guaranteed, feature functions stable.</td><td>Complete development based on new features and publish applications.</td></tr>
+<tr><td>Canary</td><td>Early access version, feature functions pending stabilization</td><td>Can report issues, Huawei resolves them with full effort</td></tr>
+<tr><td>Beta</td><td>Publicly released Beta version, feature functions pending stabilization</td><td>Can provide usage feedback to improve the product</td></tr>
+<tr><td>Release</td><td>Official release version, quality committed, feature functions stable</td><td>Can complete development based on new features and publish apps</td></tr>
 </tbody>
 </table>
 </div>
 <h2>HarmonyOS Supported Device Model List</h2>
-<h3 id="en-device-手机">Smartphones</h3>
+<h3 id="en-device-手机">Phones</h3>
 <div class="table-responsive"><table>
 <thead><tr><th>Device Series</th><th>Device Model</th><th>Model Code</th><th>Supported Version</th></tr></thead><tbody>
 <tr><td><b>Mate 60 Series</b></td><td>Mate 60</td><td>BRA-AL00</td><td>26.0.0</td></tr>
@@ -520,14 +527,14 @@ Inspired by <a href="https://apilevels.com/" target="_blank">Android API Levels<
 <tr><td><b>Mate 70 Series</b></td><td>Mate 70</td><td>CLS-AL00, CLS-AL30</td><td>26.0.0</td></tr>
 <tr><td></td><td>Mate 70 Air</td><td>SUP-AL90, SUP-AL90a</td><td>26.0.0</td></tr>
 <tr><td></td><td>Mate 70 Pro</td><td>PLR-AL00, PLR-AL30</td><td>26.0.0</td></tr>
-<tr><td></td><td>Mate 70 Pro Premium Edition</td><td>PLR-AL50</td><td>26.0.0</td></tr>
+<tr><td></td><td>Mate 70 Pro Plus Edition</td><td>PLR-AL50</td><td>26.0.0</td></tr>
 <tr><td></td><td>Mate 70 Pro+</td><td>PLA-AL10</td><td>26.0.0</td></tr>
 <tr><td></td><td>Mate 70 RS Ultimate Design</td><td>PLU-AL10</td><td>26.0.0</td></tr>
 <tr><td><b>Mate 80 Series</b></td><td>Mate 80</td><td>VYG-AL00, VYG-AL30</td><td>26.0.0</td></tr>
 <tr><td></td><td>Mate 80 Pro</td><td>SGT-AL00, SGT-AL50</td><td>26.0.0</td></tr>
 <tr><td></td><td>Mate 80 Pro Max</td><td>SGT-AL10</td><td>6.1.0</td></tr>
-<tr><td></td><td>Mate 80 Pro Max (including Dynamic Edition)</td><td>SGT-AL10</td><td>26.0.0</td></tr>
-<tr><td></td><td>Mate 80 Pro Max (including Dynamic Edition)</td><td>SGT-AL10</td><td>6.1.1</td></tr>
+<tr><td></td><td>Mate 80 Pro Max (with Turbo Edition)</td><td>SGT-AL10</td><td>26.0.0</td></tr>
+<tr><td></td><td>Mate 80 Pro Max (with Turbo Edition)</td><td>SGT-AL10</td><td>6.1.1</td></tr>
 <tr><td></td><td>Mate 80 RS Ultimate Design</td><td>SGU-AL10</td><td>26.0.0</td></tr>
 <tr><td><b>Mate 90 Series</b></td><td>Mate 90</td><td>HLS-AL00</td><td>26.0.0</td></tr>
 <tr><td></td><td>Mate 90 Pro</td><td>CMS-AL20</td><td>26.0.0</td></tr>
@@ -544,7 +551,7 @@ Inspired by <a href="https://apilevels.com/" target="_blank">Android API Levels<
 <tr><td></td><td>Mate XT Ultimate Design</td><td>GRL-AL10</td><td>26.0.0</td></tr>
 <tr><td></td><td>Mate XTs Ultimate Design</td><td>GRL-AL20</td><td>26.0.0</td></tr>
 <tr><td><b>Pocket 2 Series</b></td><td>Pocket 2</td><td>LEM-AL00</td><td>26.0.0</td></tr>
-<tr><td></td><td>Pocket 2 Premium Edition</td><td>LEM-AL50</td><td>26.0.0</td></tr>
+<tr><td></td><td>Pocket 2 Plus Edition</td><td>LEM-AL50</td><td>26.0.0</td></tr>
 <tr><td></td><td>Pocket 2 Art Custom Edition</td><td>LEM-AL00</td><td>26.0.0</td></tr>
 <tr><td><b>Pura 70 Series</b></td><td>Pura 70</td><td>ADY-AL00</td><td>26.0.0</td></tr>
 <tr><td></td><td>Pura 70 Pro</td><td>HBN-AL00</td><td>26.0.0</td></tr>
@@ -592,10 +599,10 @@ Inspired by <a href="https://apilevels.com/" target="_blank">Android API Levels<
 <h3 id="en-device-平板">Tablets</h3>
 <div class="table-responsive"><table>
 <thead><tr><th>Device Series</th><th>Device Model</th><th>Model Code</th><th>Supported Version</th></tr></thead><tbody>
-<tr><td><b>Other</b></td><td>MatePad 11.5 2026</td><td>TXZ-W10, TXZ-W20, TXZ-AL10</td><td>26.0.0</td></tr>
+<tr><td><b>Others</b></td><td>MatePad 11.5 2026 Edition</td><td>TXZ-W10, TXZ-W20, TXZ-AL10</td><td>26.0.0</td></tr>
 <tr><td></td><td>MatePad 11.5 S</td><td>TGR-W00/W00G, TGR-W10/W10G, TGR-W20, TGR-W40</td><td>6.1.0</td></tr>
 <tr><td></td><td>MatePad 11.5 S 2025</td><td>SLG-W10, SLG-W50</td><td>26.0.0</td></tr>
-<tr><td></td><td>MatePad 11.5 S 2025</td><td>SLG-W10, SLG-W50</td><td>6.1.1</td></tr>
+<tr><td></td><td>MatePad 11.5 S 2025 Edition</td><td>SLG-W10, SLG-W50</td><td>6.1.1</td></tr>
 <tr><td></td><td>MatePad Air 12-inch 2025</td><td>LRT-W00</td><td>5.0.5</td></tr>
 <tr><td></td><td>MatePad Air 12-inch 2024</td><td>BKY-W00, BKY-W10, BKY-W20, BKY-W21</td><td>6.1.0</td></tr>
 <tr><td></td><td>MatePad Air 12-inch 2025</td><td>LRT-W00, LRT-W20, LRT-W30</td><td>26.0.0</td></tr>
@@ -616,10 +623,10 @@ Inspired by <a href="https://apilevels.com/" target="_blank">Android API Levels<
 <tr><td></td><td>MatePad Pro Max Standard Edition</td><td>GEM-W40</td><td>26.0.0</td></tr>
 <tr><td></td><td>MatePad Pro Standard Edition</td><td>DAL-W20</td><td>6.1.1</td></tr>
 </tbody></table></div>
-<h3 id="en-device-pc">PCs</h3>
+<h3 id="en-device-pc">PC</h3>
 <div class="table-responsive"><table>
 <thead><tr><th>Device Series</th><th>Device Model</th><th>Model Code</th><th>Supported Version</th></tr></thead><tbody>
-<tr><td><b>Other</b></td><td>HUAWEI MateBook 14 HarmonyOS Edition</td><td>MNTXM-24A, MNTXM-24B</td><td>6.1.0</td></tr>
+<tr><td><b>Others</b></td><td>HUAWEI MateBook 14 HarmonyOS Edition</td><td>MNTXM-24A, MNTXM-24B</td><td>6.1.0</td></tr>
 <tr><td></td><td>MateBook 14 HarmonyOS Edition</td><td>MNTXM-24A, MNTXM-24B</td><td>26.0.0</td></tr>
 <tr><td></td><td>MateBook Fold Ultimate Design</td><td>SLM-W24, SLM-W32, HPR-W72</td><td>26.0.0</td></tr>
 <tr><td></td><td>MateBook Pro</td><td>HAD-W24, HAD-W32</td><td>26.0.0</td></tr>
@@ -639,13 +646,13 @@ Inspired by <a href="https://apilevels.com/" target="_blank">Android API Levels<
 <tr><td></td><td>WATCH GT 7</td><td>-</td><td>6.1.1</td></tr>
 <tr><td></td><td>WATCH GT 7 Pro</td><td>-</td><td>6.1.1</td></tr>
 <tr><td><b>WATCH Ultimate Series</b></td><td>WATCH Ultimate 2 Ultimate Exploration</td><td>-</td><td>6.1.0</td></tr>
-<tr><td></td><td>Ultimate Design Star Diamond Edition</td><td>-</td><td>6.1.1</td></tr>
+<tr><td></td><td>Ultimate Design Star Diamond Bloom Edition</td><td>-</td><td>6.1.1</td></tr>
 <tr><td></td><td>Ultimate Design Purple Gold Edition</td><td>-</td><td>6.1.0</td></tr>
 <tr><td></td><td>Ultimate Design Sapphire Gold Edition</td><td>-</td><td>6.0.1</td></tr>
 <tr><td><b>WATCH Series</b></td><td>WATCH 5</td><td>-</td><td>6.1.0</td></tr>
-<tr><td><b>Other</b></td><td>WATCH FIT Series</td><td>WATCH FIT 5, WATCH FIT 5 Pro</td><td>6.1.1</td></tr>
+<tr><td><b>Others</b></td><td>WATCH FIT Series</td><td>WATCH FIT 5, WATCH FIT 5 Pro</td><td>6.1.1</td></tr>
 <tr><td></td><td>WATCH GT Series</td><td>WATCH GT 7, WATCH GT 7 Pro</td><td>6.1.1</td></tr>
-<tr><td></td><td>WATCH Ultimate Series</td><td>Ultimate Design Star Diamond Edition</td><td>6.1.1</td></tr>
+<tr><td></td><td>WATCH Ultimate Series</td><td>Ultimate Design Star Diamond Bloom Edition</td><td>6.1.1</td></tr>
 <tr><td></td><td>WATCH Series</td><td>WATCH 5</td><td>6.1.0</td></tr>
 <tr><td></td><td>Kids Series</td><td>Supernova Watch X1, Supernova Watch X1 Pro</td><td>6.1.1</td></tr>
 <tr><td><b>Kids Series</b></td><td>Supernova Watch X1</td><td>-</td><td>6.1.1</td></tr>
@@ -715,6 +722,37 @@ Inspired by <a href="https://apilevels.com/" target="_blank">Android API Levels<
             }
         });
     }
+})();
+</script>
+<script>
+(function() {
+    var mq = window.matchMedia("(max-width: 768px)");
+    document.querySelectorAll("#toc").forEach(function(toc) {
+        var h3 = toc.querySelector("h3");
+        if (!h3) return;
+        var sync = function() {
+            // 桌面端始终展开；移动端默认折叠（用户手动展开过后不再强制收起）
+            if (!mq.matches || toc.dataset.opened) {
+                toc.classList.remove("collapsed");
+                h3.setAttribute("aria-expanded", "true");
+            } else {
+                toc.classList.add("collapsed");
+                h3.setAttribute("aria-expanded", "false");
+            }
+        };
+        var toggle = function() {
+            toc.classList.toggle("collapsed");
+            var collapsed = toc.classList.contains("collapsed");
+            if (!collapsed) toc.dataset.opened = "1";
+            h3.setAttribute("aria-expanded", collapsed ? "false" : "true");
+        };
+        h3.addEventListener("click", toggle);
+        h3.addEventListener("keydown", function(e) {
+            if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); }
+        });
+        sync();
+        if (mq.addEventListener) mq.addEventListener("change", sync);
+    });
 })();
 </script>
 <script>
