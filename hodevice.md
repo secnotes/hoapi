@@ -1,7 +1,7 @@
 # HarmonyOS 支持设备型号清单
 
 > 数据来源: https://developer.huawei.com/consumer/cn/doc/harmonyos-releases/support-device
-> 更新时间: 2026-10-15
+> 更新时间: 2026-10-20
 
 ## 手机
 

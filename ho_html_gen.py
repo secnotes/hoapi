@@ -111,7 +111,7 @@ def parse_device_md(md_content):
                 html_parts.append('</tbody></table></div>')
                 in_table = False
             section_title = stripped[3:]
-            html_parts.append(f'<h3 id="device-{section_title.lower()}">{section_title}</h3>')
+            html_parts.append(f'<h2 id="device-{section_title.lower()}">{section_title}</h2>')
             html_parts.append('<div class="table-responsive"><table>')
             in_table = True
             current_series = None
@@ -154,9 +154,219 @@ def parse_device_md(md_content):
     return main_title, '\n'.join(html_parts)
 
 
-def render_md(md_content, device_content):
-    """渲染 hoapi.md 的标题/表格/段落 + 设备清单 + 数据来源章节为 HTML
-    （不含 site-title/intro/toc/footer/chrome）。"""
+def render_inline_md(cell):
+    """渲染单元格内联 Markdown：[text](url "title") -> <a>、**bold** -> <strong>。
+    链接先于转义抽离，避免 url / 标题里的引号被二次转义；其余文本 html.escape。"""
+    parts = []
+    last = 0
+    for m in re.finditer(r'\[([^\]]+)\]\(([^)\s]+)(?:\s+"([^"]*)")?\)', cell):
+        parts.append(html.escape(cell[last:m.start()]))
+        text = html.escape(m.group(1))
+        url = html.escape(m.group(2), quote=True)
+        title_attr = f' title="{html.escape(m.group(3))}"' if m.group(3) else ''
+        parts.append(f'<a href="{url}"{title_attr} target="_blank" rel="noopener">{text}</a>')
+        last = m.end()
+    parts.append(html.escape(cell[last:]))
+    out = ''.join(parts)
+    # 加粗：* 不被 html.escape 处理，抽取链接后统一替换（链接文本内的 ** 不会被误伤）
+    out = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', out)
+    return out
+
+
+def parse_honum_md(md_content):
+    """解析 honum.md（纯血鸿蒙装机量里程碑）：返回 (主标题, HTML 内容)。
+    通用 Markdown 表格渲染：一级标题 + 单张表格，不套用 API 表的 NEW/使用率等特殊规则。"""
+    if not md_content:
+        return None, ''
+    lines = md_content.split('\n')
+    html_parts = []
+    main_title = None
+    in_table = False
+
+    for line in lines:
+        stripped = line.strip()
+        if stripped.startswith('# '):
+            main_title = stripped[2:]
+            continue
+        if not stripped:
+            if in_table:
+                html_parts.append('</tbody></table></div>')
+                in_table = False
+            continue
+        if stripped.startswith('|'):
+            raw_cells = stripped.split('|')
+            if raw_cells and raw_cells[0] == '':
+                raw_cells = raw_cells[1:]
+            if raw_cells and raw_cells[-1] == '':
+                raw_cells = raw_cells[:-1]
+            cells = [c.strip() for c in raw_cells]
+            # 跳过分隔行（|---|---|）
+            if not cells or all(set(c) <= set('-:|') for c in cells):
+                continue
+            if not in_table:
+                html_parts.append('<div class="table-responsive">')
+                html_parts.append('<table>')
+                in_table = True
+                is_header = True  # 表格首行即表头（Markdown 约定）
+            else:
+                is_header = False
+            row_parts = ['<thead><tr>'] if is_header else ['<tr>']
+            for cell in cells:
+                cell = render_inline_md(cell)
+                tag = 'th' if is_header else 'td'
+                row_parts.append(f'<{tag}>{cell}</{tag}>')
+            row_parts.append('</tr>')
+            if is_header:
+                row_parts.append('</thead><tbody>')
+            html_parts.append(''.join(row_parts))
+        else:
+            # 非表格行（如引用 > ...）按段落处理
+            if in_table:
+                html_parts.append('</tbody></table></div>')
+                in_table = False
+            html_parts.append(f'<p>{html.escape(stripped)}</p>')
+
+    if in_table:
+        html_parts.append('</tbody></table></div>')
+
+    return main_title, '\n'.join(html_parts)
+
+
+def parse_honum_data(md_content):
+    """从 honum.md 表格提取装机量时序数据，返回 dict 列表。
+    每项含：label（'25/07' 短日期）、value（万台 float）、date_raw（原始日期文本）、
+    source（来源/事件文本，去 markdown 链接语法）、milestone（核心战略意义文本）。
+    日期按出现顺序即时间顺序（md 已按时间排列）。"""
+    if not md_content:
+        return []
+    points = []
+    for line in md_content.split('\n'):
+        s = line.strip()
+        if not s.startswith('|'):
+            continue
+        raw = s.split('|')
+        if raw and raw[0] == '':
+            raw = raw[1:]
+        if raw and raw[-1] == '':
+            raw = raw[:-1]
+        cells = [c.strip() for c in raw]
+        if len(cells) < 2 or cells[0] in ('统计截止日期', '装机量'):
+            continue
+        if all(set(c) <= set('-:|') for c in cells):
+            continue
+        date_cell = cells[0]
+        val_cell = cells[1]
+        # 日期：2025年7月30日 -> 25/07；2025年9月底 -> 25/09；2026年1月 -> 26/01
+        dm = re.match(r'(\d{4})年(\d{1,2})月', date_cell)
+        if not dm:
+            continue
+        label = f"{dm.group(1)[2:]}/{int(dm.group(2)):02d}"
+        # 数值：1,000 万台 / 9,500 万台+ / 突破 7000 万台 -> float
+        vm = re.search(r'([\d,]+)', val_cell)
+        if not vm:
+            continue
+        value = float(vm.group(1).replace(',', ''))
+
+        def strip_md(text):
+            """去 markdown 链接语法 [text](url) 只留 text；去 ** 加粗标记"""
+            text = re.sub(r'\[([^\]]+)\]\([^)]+\)', r'\1', text)
+            text = text.replace('**', '')
+            return text.strip()
+
+        source = strip_md(cells[2]) if len(cells) > 2 else ''
+        milestone = strip_md(cells[3]) if len(cells) > 3 else ''
+        points.append({
+            'label': label, 'value': value, 'date_raw': date_cell.replace('**', ''),
+            'source': source, 'milestone': milestone,
+        })
+    return points
+
+
+def render_honum_chart(points):
+    """将装机量时序数据渲染为内联 SVG 折线图（无外部依赖）。
+    含坐标轴、网格线、数据点、自定义 hover 浮层 tooltip（日期/装机量/来源/意义）。
+    points 为 parse_honum_data 返回的 dict 列表。"""
+    if len(points) < 2:
+        return ''
+    w, h = 760, 320
+    pad_l, pad_r, pad_t, pad_b = 56, 24, 24, 44  # 内边距：左留 Y 轴标签
+    plot_w = w - pad_l - pad_r
+    plot_h = h - pad_t - pad_b
+
+    values = [p['value'] for p in points]
+    v_max = max(values)
+    # Y 轴上限取整到 1000 万的整数倍，略高于最大值
+    y_top = max(1000, ((int(v_max) // 1000) + 1) * 1000)
+    n_ticks = 5
+    half_step = (x_step := plot_w / (len(points) - 1)) / 2  # 每点热区半宽
+
+    def x(i):
+        return pad_l + (plot_w * i / (len(points) - 1))
+
+    def y(v):
+        return pad_t + plot_h * (1 - v / y_top)
+
+    def esc(t):
+        return html.escape(str(t), quote=True)
+
+    parts = [f'<div class="honum-chart"><svg viewBox="0 0 {w} {h}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="纯血鸿蒙装机量增长折线图">']
+
+    # Y 轴网格线 + 刻度标签
+    for t in range(n_ticks + 1):
+        gv = y_top * t / n_ticks
+        gy = y(gv)
+        parts.append(f'<line x1="{pad_l}" y1="{gy:.1f}" x2="{w-pad_r}" y2="{gy:.1f}" class="grid"/>')
+        parts.append(f'<text x="{pad_l-8}" y="{gy+4:.1f}" text-anchor="end" class="axis">{int(gv)}</text>')
+
+    # X 轴标签（数据点多时隔点显示，避免重叠）
+    step = max(1, len(points) // 12)
+    for i, p in enumerate(points):
+        if i % step != 0 and i != len(points) - 1:
+            continue
+        parts.append(f'<text x="{x(i):.1f}" y="{h-pad_b+18}" text-anchor="middle" class="axis">{p["label"]}</text>')
+
+    # 折线路径
+    path = ' '.join(f'{x(i):.1f},{y(p["value"]):.1f}' for i, p in enumerate(points))
+    parts.append(f'<polyline points="{path}" class="line"/>')
+
+    # 渐变填充区域（折线下方）
+    fill_path = f'{pad_l},{y(0):.1f} ' + path + f' {x(len(points)-1):.1f},{y(0):.1f}'
+    parts.append(f'<polygon points="{fill_path}" class="area"/>')
+
+    # hover 竖线（默认隐藏，JS hover 时定位显示）
+    parts.append('<line class="hover-line" x1="0" y1="0" x2="0" y2="0" style="display:none"/>')
+
+    # 数据点 + 透明热区（提升命中范围，整条竖向带都可 hover）
+    parts.append('<g class="hit-areas">')
+    for i, p in enumerate(points):
+        cx, cy = x(i), y(p['value'])
+        parts.append(
+            f'<circle cx="{cx:.1f}" cy="{cy:.1f}" r="4" class="point"/>'
+        )
+        # 热区：以该点为中心、宽为半步长、高为绘图区高的透明矩形
+        hx = cx - half_step
+        parts.append(
+            f'<rect class="hit" x="{hx:.1f}" y="{pad_t}" width="{x_step:.1f}" height="{plot_h:.1f}" '
+            f'data-date="{esc(p["date_raw"])}" data-value="{p["value"]:,.0f}" '
+            f'data-source="{esc(p["source"])}" data-milestone="{esc(p["milestone"])}" '
+            f'data-cx="{cx:.1f}" data-cy="{cy:.1f}"/>'
+        )
+    parts.append('</g>')
+
+    # Y 轴标题
+    parts.append(f'<text x="16" y="{pad_t+plot_h//2}" transform="rotate(-90 16 {pad_t+plot_h//2})" text-anchor="middle" class="axis-title">装机量（万台）</text>')
+
+    parts.append('</svg>')
+
+    # 自定义浮层 tooltip（JS 控制定位与内容填充）
+    parts.append('<div class="chart-tooltip" hidden></div>')
+    parts.append('</div>')
+    return '\n'.join(parts)
+
+
+def render_md(md_content):
+    """渲染 hoapi.md（API列表页）：单框架/双框架/版本类型说明/数据来源章节为 HTML。
+    装机量里程碑与设备清单由 build_content 单独渲染并分属各自 tab 页。"""
     lines = md_content.split('\n')
 
     # 扫描单框架部分的最大 API（用于自动 NEW 标签）
@@ -330,13 +540,7 @@ def render_md(md_content, device_content):
         html_parts.append('</table>')
         html_parts.append('</div>')
 
-    # 设备支持清单
-    if device_content:
-        device_title, device_html = parse_device_md(device_content)
-        html_parts.append(f'<h2>{device_title}</h2>')
-        html_parts.append(device_html)
-
-    # 数据来源章节
+    # 数据来源章节（归属 API列表页）
     html_parts.append('<h2>数据来源</h2>')
     html_parts.append('<p class="source-links">')
     for link in source_links:
@@ -355,7 +559,7 @@ def get_head():
     """返回文档头部：DOCTYPE + html + head（含 <style>），到 </head>"""
     return [
         '<!DOCTYPE html>',
-        '<html>',
+        '<html data-active-page="api">',
         '<head>',
         '<meta charset="utf-8">',
         '<meta http-equiv="X-UA-Compatible" content="IE=edge">',
@@ -433,7 +637,7 @@ def get_head():
         'h2 { font-size: 1.5rem; font-weight: 600; margin-top: 2rem; margin-bottom: 1rem; padding: 0.75rem 1rem 0.5rem; background: linear-gradient(135deg, var(--title-gradient-1) 0%, var(--title-gradient-2) 100%); border-radius: 8px; }',
         'h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.75rem; }',
         'h4 { font-size: 1rem; font-weight: 600; margin-top: 1rem; margin-bottom: 0.5rem; }',
-        '#intro { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1.5rem; padding: 0.75rem 1rem 0.75rem 1.25rem; line-height: 1.7; border-left: 3px solid var(--link-color); background: linear-gradient(90deg, rgba(0, 125, 255, 0.05), transparent); text-align: left; }',
+        '#intro { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1.5rem; padding: 0.5rem 0; line-height: 1.7; text-align: center; }',
 
         # 主题切换按钮
         '#theme-toggle { position: fixed; top: 1rem; right: 1rem; background: var(--table-header-bg); border: 1px solid var(--border-color); border-radius: 50%; width: 44px; height: 44px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; transition: all 0.3s ease; z-index: 1000; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }',
@@ -467,6 +671,30 @@ def get_head():
         '.usage-cell { position: relative; min-width: 80px; }',
         '.usage-bar { border-radius: 4px; font-weight: 500; }',
 
+        # 装机量折线图（内联 SVG，无外部依赖）
+        '.honum-chart { background-color: var(--table-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; margin: 1.5rem 0; }',
+        '.honum-chart svg { width: 100%; height: auto; display: block; }',
+        '.honum-chart .grid { stroke: var(--border-color); stroke-width: 1; stroke-dasharray: 3 3; }',
+        '.honum-chart .line { fill: none; stroke: var(--link-color); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }',
+        '.honum-chart .area { fill: var(--link-color); opacity: 0.10; }',
+        '.honum-chart .point { fill: var(--link-color); stroke: var(--table-bg); stroke-width: 1.5; transition: r 0.15s ease; }',
+        '.honum-chart .point:hover { r: 6; }',
+        '.honum-chart .axis { fill: var(--text-secondary); font-size: 11px; font-family: inherit; }',
+        '.honum-chart .axis-title { fill: var(--text-secondary); font-size: 11px; font-family: inherit; }',
+        '.honum-chart .hit { fill: transparent; cursor: pointer; }',
+        '.honum-chart .hover-line { stroke: var(--link-color); stroke-width: 1; stroke-dasharray: 3 3; pointer-events: none; }',
+        # 自定义浮层 tooltip：跟随数据点，即时显示日期/装机量/来源/意义
+        '.honum-chart .chart-tooltip { position: absolute; pointer-events: none; background: var(--table-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.5rem 0.7rem; font-size: 0.8rem; line-height: 1.5; color: var(--text-color); box-shadow: 0 4px 12px rgba(0,0,0,0.15); width: max-content; max-width: 280px; z-index: 10; }',
+        '.honum-chart .chart-tooltip .tt-date { font-weight: 600; margin-bottom: 0.15rem; }',
+        '.honum-chart .chart-tooltip .tt-value { color: var(--link-color); font-weight: 600; }',
+        '.honum-chart .chart-tooltip .tt-source { color: var(--text-secondary); margin-top: 0.15rem; }',
+        '.honum-chart .chart-tooltip .tt-milestone { color: var(--text-secondary); margin-top: 0.15rem; font-size: 0.75rem; }',
+        '.honum-chart { position: relative; }',
+
+        # 装机量表格列：统计截止日期不换行；核心战略意义左对齐
+        'section[data-page="honum"] th:nth-child(1), section[data-page="honum"] td:nth-child(1) { white-space: nowrap; }',
+        'section[data-page="honum"] th:last-child, section[data-page="honum"] td:last-child { text-align: left; }',
+
         # 代码样式
         'code { background-color: var(--code-bg); padding: 0.2rem 0.4rem; border-radius: 3px; font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; font-size: 0.875em; }',
 
@@ -496,23 +724,44 @@ def get_head():
 
         # 目录样式
         '#toc { background-color: var(--table-header-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem 1.5rem; margin-bottom: 2rem; }',
-        '#toc h3 { font-size: 1rem; font-weight: 600; margin: 0 0 0.75rem 0; color: var(--text-color); }',
+        '#toc h3 { font-size: 1rem; font-weight: 600; margin: 0; color: var(--text-color); cursor: pointer; user-select: none; }',
+        '#toc.collapsed ul { display: none; }',
+        '#toc:not(.collapsed) h3 { margin-bottom: 0.75rem; }',
+        '.toc-chevron { display: inline-block; width: 0.85em; height: 0.85em; margin-left: 0.4rem; vertical-align: -0.08em; fill: none; stroke: var(--text-secondary); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.25s ease; }',
+        '#toc.collapsed .toc-chevron { transform: rotate(-90deg); }',
+        '#toc h3:hover .toc-chevron { stroke: var(--link-color); }',
         '#toc ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; }',
         '#toc li { margin: 0; }',
         '#toc a { color: var(--link-color); text-decoration: none; font-size: 0.9rem; }',
         '#toc a:hover { text-decoration: underline; }',
         '#toc .toc-section { font-weight: 600; }',
         '#toc .toc-sub { color: var(--text-secondary); font-weight: 400; }',
-        # 折叠箭头仅移动端显示（见下方媒体查询），桌面端目录始终展开
-        '.toc-chevron { display: none; }',
+        # tab 栏：顶部页级切换（API列表/装机量/设备型号清单）
+        '#tab-bar { display: flex; gap: 0; border-bottom: 2px solid var(--border-color); margin: 1.5rem 0 2rem; }',
+        '#tab-bar .tab { background: none; border: none; border-bottom: 3px solid transparent; padding: 0.75rem 1.25rem; margin-bottom: -2px; font-size: 0.95rem; font-weight: 500; color: var(--text-secondary); cursor: pointer; transition: color 0.2s ease, border-color 0.2s ease; white-space: nowrap; }',
+        '#tab-bar .tab:hover { color: var(--link-color); }',
+        '#tab-bar .tab.active { color: var(--link-color); border-bottom-color: var(--link-color); font-weight: 600; }',
+
+        # tab 页显隐：<html data-active-page="X"> 时只显示对应 section / TOC 组
+        # 中英两个内容块都遵守此规则（CSS 后代选择器跨 #page-zh / #page-en 生效）
+        ':root[data-active-page="api"] [data-page]:not([data-page="api"]),',
+        ':root[data-active-page="honum"] [data-page]:not([data-page="honum"]),',
+        ':root[data-active-page="device"] [data-page]:not([data-page="device"]) { display: none; }',
+        # TOC 组显隐：用 :root[data-active-page] + #toc ul[data-toc-page] 提升特异性，
+        # 压过桌面端 #toc ul { display: flex }（0,1,1）与移动端 #toc.collapsed ul { display:none }
+        ':root[data-active-page="api"] #toc ul[data-toc-page]:not([data-toc-page="api"]),',
+        ':root[data-active-page="honum"] #toc ul[data-toc-page]:not([data-toc-page="honum"]),',
+        ':root[data-active-page="device"] #toc ul[data-toc-page]:not([data-toc-page="device"]) { display: none; }',
 
         # 移动端响应式样式
         '@media (max-width: 768px) {',
         '    html { font-size: 14px; }',
+        '    #tab-bar { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 1rem 0 1.5rem; }',
+        '    #tab-bar .tab { padding: 0.6rem 0.9rem; font-size: 0.85rem; }',
         '    .container { padding: 0 1rem; }',
         '    #site-title { font-size: 1.75rem; margin-bottom: 0.75rem; margin-top: 0.5rem; }',
         '    h2 { font-size: 1.25rem; margin-top: 1.5rem; padding: 0.5rem 0.75rem; }',
-        '    #intro { padding: 0.5rem 0.75rem; margin-bottom: 1rem; }',
+        '    #intro { padding: 0.5rem 0; margin-bottom: 1rem; }',
         '    #theme-toggle { top: 0.5rem; right: 0.5rem; width: 36px; height: 36px; }',
         '    #theme-toggle svg { width: 18px; height: 18px; }',
         '    #lang-toggle { top: 0.5rem; right: 3rem; width: 36px; height: 36px; font-size: 0.75rem; }',
@@ -527,12 +776,6 @@ def get_head():
         '    #toc { padding: 0.75rem 1rem; margin-bottom: 1rem; }',
         '    #toc ul { gap: 0.25rem 1rem; }',
         '    #toc a { font-size: 0.85rem; }',
-        # 目录默认折叠，点击标题展开/收起（配合 get_toc_js）
-        '    #toc h3 { cursor: pointer; }',
-        '    #toc.collapsed ul { display: none; }',
-        '    .toc-chevron { display: inline-block; width: 0.85em; height: 0.85em; margin-left: 0.4rem; vertical-align: -0.08em; fill: none; stroke: var(--text-secondary); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.25s ease; }',
-        '    #toc.collapsed .toc-chevron { transform: rotate(-90deg); }',
-        '    #toc h3:hover .toc-chevron { stroke: var(--link-color); }',
         '    .beta, .stable, .paren, .milestone { font-size: 0.65rem; padding: 0.15rem 0.3rem; }',
         '    #site-footer { margin-top: 30px; padding: 20px 15px; }',
         '    .source-links a { margin-right: 0.75rem; font-size: 0.85rem; }',
@@ -627,17 +870,16 @@ def get_lang_js():
 
 
 def get_toc_js():
-    """目录折叠 JS：移动端默认折叠，点击/键盘切换标题展开收起。
-    中英两个内容块各有一个 #toc（结构性 id 未做前缀隔离），统一处理。"""
+    """目录折叠 JS：桌面端与移动端均默认折叠，点击/键盘切换标题展开收起。
+    用户手动展开过后不再强制收起。中英两个内容块各有一个 #toc，统一处理。"""
     return '''<script>
 (function() {
-    var mq = window.matchMedia("(max-width: 768px)");
     document.querySelectorAll("#toc").forEach(function(toc) {
         var h3 = toc.querySelector("h3");
         if (!h3) return;
         var sync = function() {
-            // 桌面端始终展开；移动端默认折叠（用户手动展开过后不再强制收起）
-            if (!mq.matches || toc.dataset.opened) {
+            // 默认折叠；用户手动展开过后不再强制收起
+            if (toc.dataset.opened) {
                 toc.classList.remove("collapsed");
                 h3.setAttribute("aria-expanded", "true");
             } else {
@@ -656,7 +898,135 @@ def get_toc_js():
             if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); }
         });
         sync();
-        if (mq.addEventListener) mq.addEventListener("change", sync);
+    });
+})();
+</script>'''
+
+
+def get_tab_js():
+    """tab 页切换 JS：在 <html> 上维护 data-active-page，CSS 据此显隐 section/TOC。
+    支持 hash 深链（#api/#honum/#device）与 section 锚点深链（自动切到所属页）。
+    tab 状态存 localStorage，语言切换不影响（data-active-page 在 <html> 上）。"""
+    return '''<script>
+(function() {
+    var PAGES = ["api", "honum", "device"];
+    // 已知 section 锚点 -> 所属页（深链到子节时自动切页）
+    var SECTION_PAGE = {
+        "单框架": "api", "双框架": "api", "版本类型说明": "api", "数据来源": "api",
+        "装机量里程碑": "honum",
+        "device-手机": "device", "device-平板": "device", "device-pc": "device",
+        "device-穿戴": "device", "device-iot": "device", "device-预览版支持": "device"
+    };
+
+    function pageFromHash(hash) {
+        if (!hash) return null;
+        // 解码 %E6%89%8B%E6%9C%BA 等编码（中文锚点深链）
+        var h = decodeURIComponent(hash.replace(/^#/, ""));
+        if (PAGES.indexOf(h) >= 0) return h;
+        if (SECTION_PAGE[h]) return SECTION_PAGE[h];
+        return null;
+    }
+
+    function setPage(name, opts) {
+        opts = opts || {};
+        if (PAGES.indexOf(name) < 0) name = "api";
+        document.documentElement.setAttribute("data-active-page", name);
+        localStorage.setItem("active-page", name);
+        // 同步中英两块 tab 按钮的 active 态
+        document.querySelectorAll("#tab-bar .tab").forEach(function(btn) {
+            btn.classList.toggle("active", btn.getAttribute("data-tab") === name);
+        });
+        // 更新 hash（避免回切触发循环：仅当 hash 不已是该页时写）
+        var wantHash = "#" + name;
+        if (location.hash !== wantHash && !opts.fromHash) {
+            history.replaceState(null, "", wantHash);
+        }
+    }
+
+    function init() {
+        var initial = pageFromHash(location.hash)
+            || localStorage.getItem("active-page")
+            || "api";
+        setPage(initial, {fromHash: !!location.hash});
+        // 绑定中英两块 tab 按钮（脚本在 body 末尾，DOM 已就绪）
+        document.querySelectorAll("#tab-bar .tab").forEach(function(btn) {
+            btn.addEventListener("click", function() {
+                setPage(btn.getAttribute("data-tab"));
+            });
+        });
+    }
+
+    init();
+
+    // hashchange（前进/后退/手改 URL）：重新解析，但避免与 setPage 写 hash 循环
+    window.addEventListener("hashchange", function() {
+        var p = pageFromHash(location.hash);
+        if (p) setPage(p, {fromHash: true});
+    });
+})();
+</script>'''
+
+
+def get_chart_js():
+    """装机量折线图 hover 浮层 JS：鼠标移到数据点热区时显示详情浮层 + 竖线。
+    中英两块各一张图，统一处理。坐标系换算：SVG viewBox -> 实际像素。"""
+    return '''<script>
+(function() {
+    document.querySelectorAll(".honum-chart").forEach(function(chart) {
+        var svg = chart.querySelector("svg");
+        var tip = chart.querySelector(".chart-tooltip");
+        var hline = chart.querySelector(".hover-line");
+        if (!svg || !tip || !hline) return;
+        var pts = chart.querySelectorAll(".hit");
+
+        function show(rect, data) {
+            var vb = svg.viewBox.baseVal;
+            var cx = parseFloat(data.dataset.cx);
+            var cy = parseFloat(data.dataset.cy);
+            // viewBox -> 像素换算
+            var px = cx * (svg.clientWidth / vb.width);
+            var py = cy * (svg.clientHeight / vb.height);
+            tip.innerHTML =
+                '<div class="tt-date">' + data.dataset.date + '</div>' +
+                '<div class="tt-value">' + data.dataset.value + ' 万台</div>' +
+                (data.dataset.source ? '<div class="tt-source">' + data.dataset.source + '</div>' : '') +
+                (data.dataset.milestone ? '<div class="tt-milestone">' + data.dataset.milestone + '</div>' : '');
+            tip.hidden = false;  // 先显示才能测宽
+            // 边缘检测：浮层宽度 vs 数据点到容器左右边的距离
+            var tw = tip.offsetWidth;
+            var chartW = chart.clientWidth;
+            var left;
+            if (px - tw / 2 < 8) {
+                // 靠近左边缘：左对齐到 8px
+                left = 8;
+            } else if (px + tw / 2 > chartW - 8) {
+                // 靠近右边缘：右对齐到容器右边 8px
+                left = chartW - 8 - tw;
+            } else {
+                // 居中在数据点上方
+                left = px - tw / 2;
+            }
+            tip.style.left = left + "px";
+            tip.style.top = (py - 8) + "px";  // 数据点上方 8px
+            tip.style.transform = "translateY(-100%)";  // 底部对齐到 top
+            // 竖线：从数据点到 X 轴底部
+            var yBottom = vb.height - 44;  // pad_b
+            hline.setAttribute("x1", cx);
+            hline.setAttribute("x2", cx);
+            hline.setAttribute("y1", cy);
+            hline.setAttribute("y2", yBottom);
+            hline.style.display = "";
+        }
+        function hide() {
+            tip.hidden = true;
+            hline.style.display = "none";
+        }
+
+        pts.forEach(function(rect) {
+            rect.addEventListener("mouseenter", function() { show(rect, rect); });
+            rect.addEventListener("mousemove", function() { show(rect, rect); });
+            rect.addEventListener("mouseleave", hide);
+        });
     });
 })();
 </script>'''
@@ -666,15 +1036,32 @@ def get_toc_js():
 # 内容片段（语言相关，会被翻译）
 # ============================================================================
 
+def get_tab_bar_html():
+    """顶部 tab 栏：3 个 tab 切换 API列表/装机量/设备型号清单。
+    active 态由 get_tab_js 运行时根据 data-active-page 同步；初始默认 api。"""
+    return [
+        '<nav id="tab-bar" aria-label="页面切换">',
+        '<button data-tab="api" class="tab active">API列表</button>',
+        '<button data-tab="honum" class="tab">装机量</button>',
+        '<button data-tab="device" class="tab">设备型号清单</button>',
+        '</nav>',
+    ]
+
+
 def get_toc_html():
-    """目录 HTML"""
+    """目录 HTML：按 tab 页拆 3 个 <ul data-toc-page>，CSS 只显示当前页对应的那组。"""
     return [
         '<div id="toc">',
         '<h3 role="button" tabindex="0" aria-expanded="true">目录<svg class="toc-chevron" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></h3>',
-        '<ul>',
-        '<li><a href="#单框架" class="toc-section">单框架</a></li>',
-        '<li><a href="#双框架" class="toc-section">双框架</a></li>',
-        '<li><a href="#版本类型说明" class="toc-section">版本类型说明</a></li>',
+        '<ul data-toc-page="api">',
+        '<li><a href="#单框架" class="toc-sub">单框架</a></li>',
+        '<li><a href="#双框架" class="toc-sub">双框架</a></li>',
+        '<li><a href="#版本类型说明" class="toc-sub">版本类型说明</a></li>',
+        '</ul>',
+        '<ul data-toc-page="honum">',
+        '<li><a href="#装机量里程碑" class="toc-sub">装机量里程碑</a></li>',
+        '</ul>',
+        '<ul data-toc-page="device">',
         '<li><a href="#device-手机" class="toc-sub">手机</a></li>',
         '<li><a href="#device-平板" class="toc-sub">平板</a></li>',
         '<li><a href="#device-pc" class="toc-sub">PC</a></li>',
@@ -707,13 +1094,13 @@ def get_footer_content():
     ]
 
 
-def build_content(md_content, device_content, last_updated):
-    """构建页面正文内容（site-title + intro + toc + 表格 + 数据来源 + 页脚）。
+def build_content(md_content, device_content, last_updated, honum_content=None):
+    """构建页面正文内容：site-title + intro + tab 栏 + scoped TOC + 3 个 tab 页 section + 页脚。
     用 <!--content--> 注释包裹，便于 AI 翻译后整文件提取。不含 head/按钮/JS。"""
     updated_tag = f'（最近更新：{last_updated}）' if last_updated else ''
     parts = []
 
-    # 顶部容器：标题 + 简介 + 目录
+    # 顶部容器：标题 + 简介 + tab 栏 + 目录
     parts.append('<div class="container">')
     parts.append('<h1 id="site-title"><a href="#">HarmonyOS API Levels</a></h1>')
     parts.append(
@@ -721,13 +1108,40 @@ def build_content(md_content, device_content, last_updated):
         f'单框架代表纯鸿蒙架构，双框架则兼容 Android 应用生态。'
         f'使用率数据来源于华为官方，定期更新。{updated_tag}</p>'
     )
+    parts.extend(get_tab_bar_html())
     parts.extend(get_toc_html())
     parts.append('</div>')
 
-    # 内容容器：表格/设备清单/数据来源
+    # 内容容器：3 个 tab 页 section（CSS 按当前 active-page 显隐）
     parts.append('<div class="container">')
     parts.append('<div id="page-content">')
-    parts.append(render_md(md_content, device_content))
+
+    # API列表页：单框架/双框架/版本类型说明/数据来源
+    parts.append('<section data-page="api">')
+    parts.append(render_md(md_content))
+    parts.append('</section>')
+
+    # 装机量页
+    if honum_content:
+        honum_title, honum_html = parse_honum_md(honum_content)
+        if honum_html:
+            title = honum_title or '纯血鸿蒙装机量里程碑'
+            parts.append('<section data-page="honum">')
+            parts.append(f'<h2 id="装机量里程碑">{title}</h2>')
+            # 折线图：表格上方，数据从 honum.md 提取
+            chart = render_honum_chart(parse_honum_data(honum_content))
+            if chart:
+                parts.append(chart)
+            parts.append(honum_html)
+            parts.append('</section>')
+
+    # 设备型号清单页：各设备类型（手机/平板/...）直接作为 h2 章节
+    if device_content:
+        _, device_html = parse_device_md(device_content)
+        parts.append('<section data-page="device">')
+        parts.append(device_html)
+        parts.append('</section>')
+
     parts.append('</div>')
     parts.append('</div>')
 
@@ -750,6 +1164,8 @@ def wrap_single(content):
     parts.append(content)
     parts.append(get_theme_js())
     parts.append(get_toc_js())
+    parts.append(get_tab_js())
+    parts.append(get_chart_js())
     parts.append('</body>')
     parts.append('</html>')
     return '\n'.join(parts)
@@ -770,6 +1186,8 @@ def wrap_bilingual(zh_content, en_content):
     parts.append('</div>')
     parts.append(get_theme_js())
     parts.append(get_toc_js())
+    parts.append(get_tab_js())
+    parts.append(get_chart_js())
     parts.append(get_lang_js())
     parts.append('</body>')
     parts.append('</html>')
@@ -781,7 +1199,7 @@ def wrap_bilingual(zh_content, en_content):
 # ============================================================================
 
 # 结构性 id（CSS 钩子）——namespace 时不加前缀；浏览器对重复 id 仍应用样式
-STRUCTURAL_IDS = {'site-title', 'intro', 'toc', 'page-content', 'site-footer'}
+STRUCTURAL_IDS = {'site-title', 'intro', 'toc', 'tab-bar', 'page-content', 'site-footer'}
 
 
 def translate_html_to_english(html_text, base_url, model, api_key):
@@ -873,7 +1291,7 @@ def extract_content(full_html):
 # ============================================================================
 
 def generate_html(md_file='hoapi.md', device_file='hodevice.md', html_file='index.html',
-                  ai_base_url=None, ai_model=None, api_key=None):
+                  ai_base_url=None, ai_model=None, api_key=None, honum_file='honum.md'):
     """从 MD 文件生成 HTML 文件。
     AI 配置优先级：入参 > 系统/Shell 环境变量 > .env 文件（AI_BASE_URL / AI_MODEL / AI_API_KEY）。
     配置齐全时生成双语版（AI 整文件翻译），否则仅中文版。"""
@@ -889,8 +1307,15 @@ def generate_html(md_file='hoapi.md', device_file='hodevice.md', html_file='inde
         except FileNotFoundError:
             print(f"文件 {device_file} 不存在，跳过设备支持清单")
 
-        last_updated = get_last_updated(md_file, device_file)
-        zh_content = build_content(md_content, device_content, last_updated)
+        honum_content = None
+        try:
+            with open(honum_file, 'r', encoding='utf-8') as f:
+                honum_content = f.read()
+        except FileNotFoundError:
+            print(f"文件 {honum_file} 不存在，跳过装机量里程碑")
+
+        last_updated = get_last_updated(md_file, device_file, honum_file)
+        zh_content = build_content(md_content, device_content, last_updated, honum_content)
 
         # AI 配置：入参优先，回退环境变量
         base_url = ai_base_url or os.environ.get('AI_BASE_URL')
