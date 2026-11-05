@@ -8,6 +8,7 @@ HarmonyOS API HTML 生成脚本
 未配置时仅生成中文版（不渲染语言按钮）。
 """
 
+import calendar
 import datetime
 import html
 import os
@@ -175,13 +176,15 @@ def render_inline_md(cell):
 
 def parse_honum_md(md_content):
     """解析 honum.md（纯血鸿蒙装机量里程碑）：返回 (主标题, HTML 内容)。
-    通用 Markdown 表格渲染：一级标题 + 单张表格，不套用 API 表的 NEW/使用率等特殊规则。"""
+    通用 Markdown 表格渲染：一级标题 + 单张表格，不套用 API 表的 NEW/使用率等特殊规则。
+    末列「图表标注」仅供折线图 callout 取文案，不在页面表格中展示。"""
     if not md_content:
         return None, ''
     lines = md_content.split('\n')
     html_parts = []
     main_title = None
     in_table = False
+    drop_callout_col = False
 
     for line in lines:
         stripped = line.strip()
@@ -208,8 +211,12 @@ def parse_honum_md(md_content):
                 html_parts.append('<table>')
                 in_table = True
                 is_header = True  # 表格首行即表头（Markdown 约定）
+                if cells and cells[-1] == '图表标注':
+                    drop_callout_col = True
             else:
                 is_header = False
+            if drop_callout_col and len(cells) > 4:
+                cells = cells[:-1]
             row_parts = ['<thead><tr>'] if is_header else ['<tr>']
             for cell in cells:
                 cell = render_inline_md(cell)
@@ -235,7 +242,9 @@ def parse_honum_md(md_content):
 def parse_honum_data(md_content):
     """从 honum.md 表格提取装机量时序数据，返回 dict 列表。
     每项含：label（'25/07' 短日期）、value（万台 float）、date_raw（原始日期文本）、
-    source（来源/事件文本，去 markdown 链接语法）、milestone（核心战略意义文本）。
+    t（datetime，日粒度，供折线图按真实时间等距分布横坐标）、
+    source（来源/事件文本，去 markdown 链接语法）、milestone（核心战略意义文本）、
+    callout（「图表标注」列短文案，用于折线图里程碑 callout，无则空串）。
     日期按出现顺序即时间顺序（md 已按时间排列）。"""
     if not md_content:
         return []
@@ -261,6 +270,16 @@ def parse_honum_data(md_content):
         if not dm:
             continue
         label = f"{dm.group(1)[2:]}/{int(dm.group(2)):02d}"
+        # 日粒度时间值（横坐标按真实时间等距分布）；无日则取月中，
+        # 「X月底」取 28 日近似月末
+        day_m = re.search(r'(\d{1,2})日', date_cell)
+        day = int(day_m.group(1)) if day_m else (28 if '底' in date_cell else 15)
+        y_m, m_m = int(dm.group(1)), int(dm.group(2))
+        day = min(day, calendar.monthrange(y_m, m_m)[1])
+        t = datetime.date(y_m, m_m, day)
+        # 日期粒度不足可能与上一条同日/更早，向后推 1 天保证横轴单调递增
+        if points and t <= points[-1]['t']:
+            t = points[-1]['t'] + datetime.timedelta(days=1)
         # 数值：1,000 万台 / 9,500 万台+ / 突破 7000 万台 -> float
         vm = re.search(r'([\d,]+)', val_cell)
         if not vm:
@@ -275,21 +294,24 @@ def parse_honum_data(md_content):
 
         source = strip_md(cells[2]) if len(cells) > 2 else ''
         milestone = strip_md(cells[3]) if len(cells) > 3 else ''
+        callout = strip_md(cells[4]) if len(cells) > 4 else ''
         points.append({
             'label': label, 'value': value, 'date_raw': date_cell.replace('**', ''),
-            'source': source, 'milestone': milestone,
+            't': t, 'source': source, 'milestone': milestone, 'callout': callout,
         })
     return points
 
 
 def render_honum_chart(points):
     """将装机量时序数据渲染为内联 SVG 折线图（无外部依赖）。
-    含坐标轴、网格线、数据点、自定义 hover 浮层 tooltip（日期/装机量/来源/意义）。
+    横坐标按真实日期时间等距分布（各点间隔与实际时间跨度成正比），
+    含坐标轴、网格线、数据点、每点数值标签、关键里程碑 callout、
+    自定义 hover 浮层 tooltip（日期/装机量/来源/意义）。
     points 为 parse_honum_data 返回的 dict 列表。"""
     if len(points) < 2:
         return ''
     w, h = 760, 320
-    pad_l, pad_r, pad_t, pad_b = 56, 24, 24, 44  # 内边距：左留 Y 轴标签
+    pad_l, pad_r, pad_t, pad_b = 56, 24, 36, 44  # 内边距：左留 Y 轴标签，上留数值标签/callout 空间
     plot_w = w - pad_l - pad_r
     plot_h = h - pad_t - pad_b
 
@@ -298,10 +320,13 @@ def render_honum_chart(points):
     # Y 轴上限取整到 1000 万的整数倍，略高于最大值
     y_top = max(1000, ((int(v_max) // 1000) + 1) * 1000)
     n_ticks = 5
-    half_step = (x_step := plot_w / (len(points) - 1)) / 2  # 每点热区半宽
+
+    # X 轴：首尾数据点真实日期跨度映射到整个绘图区宽度
+    t0, t1 = points[0]['t'], points[-1]['t']
+    t_span = (t1 - t0).days or 1
 
     def x(i):
-        return pad_l + (plot_w * i / (len(points) - 1))
+        return pad_l + plot_w * ((points[i]['t'] - t0).days / t_span)
 
     def y(v):
         return pad_t + plot_h * (1 - v / y_top)
@@ -318,12 +343,17 @@ def render_honum_chart(points):
         parts.append(f'<line x1="{pad_l}" y1="{gy:.1f}" x2="{w-pad_r}" y2="{gy:.1f}" class="grid"/>')
         parts.append(f'<text x="{pad_l-8}" y="{gy+4:.1f}" text-anchor="end" class="axis">{int(gv)}</text>')
 
-    # X 轴标签（数据点多时隔点显示，避免重叠）
+    # X 轴标签（数据点多时隔点显示；时间上相邻过近的标签跳过，避免重叠）
     step = max(1, len(points) // 12)
+    last_label_x = -1e9
     for i, p in enumerate(points):
         if i % step != 0 and i != len(points) - 1:
             continue
-        parts.append(f'<text x="{x(i):.1f}" y="{h-pad_b+18}" text-anchor="middle" class="axis">{p["label"]}</text>')
+        lx = x(i)
+        if lx - last_label_x < 42:
+            continue
+        last_label_x = lx
+        parts.append(f'<text x="{lx:.1f}" y="{h-pad_b+18}" text-anchor="middle" class="axis">{p["label"]}</text>')
 
     # 折线路径
     path = ' '.join(f'{x(i):.1f},{y(p["value"]):.1f}' for i, p in enumerate(points))
@@ -336,17 +366,49 @@ def render_honum_chart(points):
     # hover 竖线（默认隐藏，JS hover 时定位显示）
     parts.append('<line class="hover-line" x1="0" y1="0" x2="0" y2="0" style="display:none"/>')
 
+    # 数值标签：每个数据点上方常显装机量数值（移动端无 hover 也能读到数值）
+    # 放在热区层之下，避免文字拦截 rect 的鼠标事件；
+    # 时间上相邻过近的点分层错开（上下两行），避免文字重叠
+    placed_labels = []  # 已放置标签的 (x, 层号)
+    label_tiers = []  # 每点数值标签所处层号（callout 叠高时参考）
+    for i, p in enumerate(points):
+        lx = x(i)
+        tier = 0
+        while tier < 2 and any(pt == tier and abs(lx - px) < 44 for px, pt in placed_labels):
+            tier += 1
+        placed_labels.append((lx, tier))
+        label_tiers.append(tier)
+        parts.append(f'<text x="{lx:.1f}" y="{y(p["value"]) - 8 - tier * 14:.1f}" text-anchor="middle" '
+                     f'class="pt-label">{p["value"]:,.0f}</text>')
+
+    # 关键里程碑 callout：数据点上方短文案（honum.md「图表标注」列）。
+    # 置于数值标签更上方，避免被上升的折线与填充区覆盖；
+    # 左右边缘点改用 start/end 对齐，防止文本溢出绘图区
+    for i, p in enumerate(points):
+        if not p.get('callout'):
+            continue
+        cx, cy = x(i), y(p['value'])
+        # 在数值标签上再叠高 17px；顶部数据点可上探至绘图区上方的留白
+        cy_text = max(12, cy - 8 - label_tiers[i] * 14 - 17)
+        anchor = 'start' if cx < pad_l + 28 else ('end' if cx > w - pad_r - 28 else 'middle')
+        parts.append(f'<text x="{cx:.1f}" y="{cy_text:.1f}" text-anchor="{anchor}" '
+                     f'class="callout">{esc(p["callout"])}</text>')
+
     # 数据点 + 透明热区（提升命中范围，整条竖向带都可 hover）
+    # 热区边界：相邻数据点 x 中点，首尾贴绘图区边缘（时间不等距后各带宽度不同）
+    edges = [pad_l]
+    for i in range(len(points) - 1):
+        edges.append((x(i) + x(i + 1)) / 2)
+    edges.append(w - pad_r)
     parts.append('<g class="hit-areas">')
     for i, p in enumerate(points):
         cx, cy = x(i), y(p['value'])
         parts.append(
             f'<circle cx="{cx:.1f}" cy="{cy:.1f}" r="4" class="point"/>'
         )
-        # 热区：以该点为中心、宽为半步长、高为绘图区高的透明矩形
-        hx = cx - half_step
+        # 热区：覆盖该点两侧中点之间的整条竖带
         parts.append(
-            f'<rect class="hit" x="{hx:.1f}" y="{pad_t}" width="{x_step:.1f}" height="{plot_h:.1f}" '
+            f'<rect class="hit" x="{edges[i]:.1f}" y="{pad_t}" width="{edges[i+1]-edges[i]:.1f}" height="{plot_h:.1f}" '
             f'data-date="{esc(p["date_raw"])}" data-value="{p["value"]:,.0f}" '
             f'data-source="{esc(p["source"])}" data-milestone="{esc(p["milestone"])}" '
             f'data-cx="{cx:.1f}" data-cy="{cy:.1f}"/>'
@@ -508,7 +570,7 @@ def render_md(md_content):
                     pct_match = re.match(r'(\d+(?:\.\d+)?)\s*%?', cell)
                     if pct_match:
                         pct = float(pct_match.group(1))
-                        row_parts.append(f'<td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) {pct}%, var(--usage-bar-end) {pct}%);">{pct}%</td>')
+                        row_parts.append(f'<td class="usage-bar" style="background: linear-gradient(to right, var(--usage-bar-start) {pct}%, var(--usage-bar-end) {pct}%);">{pct_match.group(1)}%</td>')
                     else:
                         row_parts.append(f'<td>{cell_processed}</td>')
                 else:
@@ -681,6 +743,8 @@ def get_head():
         '.honum-chart .point:hover { r: 6; }',
         '.honum-chart .axis { fill: var(--text-secondary); font-size: 11px; font-family: inherit; }',
         '.honum-chart .axis-title { fill: var(--text-secondary); font-size: 11px; font-family: inherit; }',
+        '.honum-chart .pt-label { fill: var(--text-secondary); font-size: 11px; font-family: inherit; pointer-events: none; }',
+        '.honum-chart .callout { fill: var(--link-color); font-size: 10.5px; font-family: inherit; pointer-events: none; }',
         '.honum-chart .hit { fill: transparent; cursor: pointer; }',
         '.honum-chart .hover-line { stroke: var(--link-color); stroke-width: 1; stroke-dasharray: 3 3; pointer-events: none; }',
         # 自定义浮层 tooltip：跟随数据点，即时显示日期/装机量/来源/意义
@@ -713,7 +777,7 @@ def get_head():
         '.separator { color: var(--text-secondary); }',
         '.github-link { display: inline-flex; align-items: center; gap: 5px; }',
         '.github-icon { width: 16px; height: 16px; }',
-        'table a { color: var(--link-color); text-decoration: none; font-weight: 600; }',
+        'table a { color: var(--link-color); text-decoration: none; }',
         'table a:hover { text-decoration: underline; }',
         '.nowrap { white-space: nowrap; }',
         '.footnote { font-size: 0.75rem; vertical-align: super; }',
